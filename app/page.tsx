@@ -1,65 +1,141 @@
-import Image from "next/image";
+import { supabase } from "@/src/lib/supabaseClient";
 
-export default function Home() {
-  return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+function display(value: unknown, suffix = "") {
+  if (value === null || value === undefined || value === "") return "—";
+  return `${value}${suffix}`;
+}
+
+export default async function ComparePage() {
+  const { data: watches, error } = await supabase
+    .from("watch_comparison_view")
+    .select("*")
+    .order("brand_name", { ascending: true });
+
+  if (error) {
+    return (
+      <main className="min-h-screen bg-neutral-950 px-8 py-12 text-neutral-100">
+        <p className="text-sm uppercase tracking-[0.35em] text-amber-200">
+          WatchComparisonAI
+        </p>
+        <h1 className="mt-8 max-w-5xl text-6xl font-semibold tracking-tight">
+          Compare watches with collector-grade detail.
+        </h1>
+        <div className="mt-12 rounded-2xl border border-red-900/70 bg-red-950/30 p-8">
+          <p className="text-lg text-red-100">
+            Unable to load watches: {error.message}
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
       </main>
-    </div>
+    );
+  }
+
+  const left = watches?.[0];
+  const right = watches?.[1];
+
+  const rows = [
+    ["Brand", left?.brand_name, right?.brand_name],
+    ["Collection", left?.collection_name, right?.collection_name],
+    ["Model", left?.model_name, right?.model_name],
+    ["Reference", left?.reference_number, right?.reference_number],
+    ["Case size", display(left?.case_size_mm, "mm"), display(right?.case_size_mm, "mm")],
+    ["Thickness", display(left?.case_thickness_mm, "mm"), display(right?.case_thickness_mm, "mm")],
+    ["Lug-to-lug", display(left?.lug_to_lug_mm, "mm"), display(right?.lug_to_lug_mm, "mm")],
+    ["Lug width", display(left?.lug_width_mm, "mm"), display(right?.lug_width_mm, "mm")],
+    ["Movement", left?.movement_type, right?.movement_type],
+    ["Caliber", left?.caliber, right?.caliber],
+    ["Power reserve", display(left?.power_reserve_hours, " hours"), display(right?.power_reserve_hours, " hours")],
+    ["Water resistance", display(left?.water_resistance_m, "m"), display(right?.water_resistance_m, "m")],
+    ["Bracelet taper", `${display(left?.bracelet_taper_from_mm)} → ${display(left?.bracelet_taper_to_mm)}mm`, `${display(right?.bracelet_taper_from_mm)} → ${display(right?.bracelet_taper_to_mm)}mm`],
+    ["Clasp type", left?.clasp_type, right?.clasp_type],
+    ["Micro-adjustment", display(left?.micro_adjustment_mm, "mm"), display(right?.micro_adjustment_mm, "mm")],
+    ["Wearability notes", left?.overall_wearability_summary || left?.comfort_notes, right?.overall_wearability_summary || right?.comfort_notes],
+  ];
+
+  return (
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,#2b2619,transparent_35%),#050505] px-6 py-10 text-neutral-100">
+      <section className="mx-auto max-w-7xl">
+        <p className="text-sm font-semibold uppercase tracking-[0.45em] text-amber-200">
+          WatchComparisonAI
+        </p>
+
+        <h1 className="mt-10 max-w-5xl text-5xl font-semibold leading-tight tracking-tight md:text-7xl">
+          Compare watches with collector-grade detail.
+        </h1>
+
+        <p className="mt-8 max-w-4xl text-xl leading-9 text-neutral-400">
+          Search references and evaluate proportions, movement specs, bracelet
+          engineering, and real-world wearability side by side.
+        </p>
+
+        <div className="mt-12 border-t border-neutral-800 pt-10">
+          {!watches?.length ? (
+            <div className="rounded-2xl border border-neutral-800 bg-neutral-900/60 p-8">
+              <p className="text-neutral-300">No watches found yet.</p>
+            </div>
+          ) : (
+            <>
+              <div className="grid gap-6 md:grid-cols-2">
+                {[left, right].map((watch, index) => (
+                  <article
+                    key={watch?.watch_id ?? index}
+                    className="rounded-3xl border border-neutral-800 bg-neutral-950/80 p-6 shadow-2xl"
+                  >
+                    <p className="text-sm uppercase tracking-[0.25em] text-amber-200/80">
+                      Watch {index === 0 ? "A" : "B"}
+                    </p>
+                    <h2 className="mt-4 text-3xl font-semibold">
+                      {watch?.brand_name} {watch?.model_name}
+                    </h2>
+                    <p className="mt-2 text-neutral-500">
+                      Ref. {display(watch?.reference_number)}
+                    </p>
+
+                    <div className="mt-6 grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p className="text-neutral-500">Case</p>
+                        <p className="text-lg">{display(watch?.case_size_mm, "mm")}</p>
+                      </div>
+                      <div>
+                        <p className="text-neutral-500">Movement</p>
+                        <p className="text-lg">{display(watch?.movement_type)}</p>
+                      </div>
+                      <div>
+                        <p className="text-neutral-500">Caliber</p>
+                        <p className="text-lg">{display(watch?.caliber)}</p>
+                      </div>
+                      <div>
+                        <p className="text-neutral-500">Water Resistance</p>
+                        <p className="text-lg">{display(watch?.water_resistance_m, "m")}</p>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+
+              <div className="mt-10 overflow-hidden rounded-3xl border border-neutral-800 bg-neutral-950/80">
+                <table className="w-full border-collapse text-left">
+                  <thead className="bg-neutral-900/80 text-sm uppercase tracking-[0.2em] text-neutral-400">
+                    <tr>
+                      <th className="w-1/5 p-5">Feature</th>
+                      <th className="w-2/5 p-5">{left?.brand_name} {left?.model_name}</th>
+                      <th className="w-2/5 p-5">{right?.brand_name} {right?.model_name}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rows.map(([label, a, b]) => (
+                      <tr key={label} className="border-t border-neutral-800">
+                        <th className="p-5 align-top text-neutral-400">{label}</th>
+                        <td className="p-5 align-top text-lg">{display(a)}</td>
+                        <td className="p-5 align-top text-lg">{display(b)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
+        </div>
+      </section>
+    </main>
   );
 }
