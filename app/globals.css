@@ -8,8 +8,16 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-obsidian: #070707;
+  --color-charcoal: #11100e;
+  --color-champagne: #d8c391;
+  --color-platinum: #e8e4d8;
+  --color-pewter: #9b9588;
+  --color-cognac: #9a6a34;
+  --shadow-aureate: 0 24px 80px rgba(0, 0, 0, 0.45);
+  --font-sans: "Inter", "SF Pro Display", "Segoe UI", ui-sans-serif, system-ui;
+  --font-serif: "Cormorant Garamond", Georgia, ui-serif, serif;
+  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -20,7 +28,14 @@
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background:
+    radial-gradient(circle at 15% 8%, rgba(154, 106, 52, 0.18), transparent 28rem),
+    linear-gradient(135deg, #070707 0%, #11100e 52%, #050505 100%);
+  color: #e8e4d8;
+  font-family: var(--font-sans);
+}
+
+button,
+input {
+  font: inherit;
 }

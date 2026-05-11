@@ -1,35 +1,13 @@
 import { CompareClient, type Watch } from "./CompareClient";
 import { supabase } from "@/src/lib/supabaseClient";
 
-const watchColumns = [
-  "id",
-  "image_url",
-  "brand",
-  "collection",
-  "model",
-  "reference_number",
-  "case_size",
-  "thickness",
-  "lug_to_lug",
-  "lug_width",
-  "movement_type",
-  "caliber",
-  "power_reserve",
-  "water_resistance",
-  "bracelet_taper",
-  "clasp_type",
-  "micro_adjustment",
-  "wearability_notes",
-  "review_status",
-].join(",");
+export const dynamic = "force-dynamic";
 
 async function loadWatches() {
-
-
-const { data, error } = await supabase
-  .from("watch_comparison_view")
-  .select("*")
-  .order("brand_name", { ascending: true });
+  const { data, error } = await supabase
+    .from("watch_comparison_view")
+    .select("*")
+    .order("brand_name", { ascending: true });
 
   return {
     watches: (data ?? []) as Watch[],
