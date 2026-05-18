@@ -26,7 +26,8 @@ Users should be able to:
 - **VS Code Supabase Extension / Supabase Connector**: Database inspection and management.
 - **Exquisite Timepieces**: Current MVP curation and retail inspiration source.
 - **Future Affiliate Partners**: Exquisite Timepieces, Jomashop, and other watch retailers.
-- **Future AI Backend**: AI-assisted sourcing of hard-to-find enthusiast specs.
+- **AI Pair Comparison API**: Server route and Supabase cache for on-demand AI comparisons between selected watches.
+- **Future AI Backend Expansion**: AI-assisted sourcing of hard-to-find enthusiast specs.
 
 ## Completed So Far
 
@@ -67,6 +68,20 @@ Users should be able to:
 - Established the affiliate-ready architecture direction:
   - Core watch specs remain stable in the main watch/spec tables.
   - Retailer price, availability, inventory, and affiliate links should eventually live in a separate retailer listings layer.
+- Redesigned the public UI with a more premium visual direction:
+  - Textured monochrome background inspired by watch dial finishing.
+  - No-photo watch cards that can later accept licensed imagery.
+  - Cleaner picklist display with reference numbers shown once as secondary text.
+  - Grouped comparison table sections for buying context, fit/case, movement/function, and bracelet/wearability.
+- Added an **AI Review** button on each watch card using existing `overall_wearability_summary` data.
+- Added an **AI Pair Review** interaction:
+  - Users intentionally click **Compare With AI** to prompt the tool.
+  - Results are not shown automatically.
+  - Cached pair reviews are reused behind the scenes.
+  - The app can generate new AI pair comparisons when `OPENAI_API_KEY` is configured.
+- Added the `watch_pair_comparisons` Supabase table and local migration for cached pair-level AI outputs.
+- Added `/api/compare-ai` to normalize watch pairs, check cached results, generate missing comparisons, and save outputs for future reuse.
+- Pushed current work to GitHub in commit `9d24da4`.
 
 ## Phase 1: Finish MVP Data
 
@@ -88,15 +103,36 @@ Goal: Make the app feel polished and launch-worthy.
 
 High-level steps:
 
-1. Refine the public comparison page with a more premium visual design.
+1. Continue refining the premium public comparison experience.
 2. Add budget/MSRP display and budget-aware comparison cues.
 3. Improve watch search, filtering, and picklist usability.
 4. Add filters for brand, category, price range, case size, movement type, GMT, chronograph, and date.
 5. Add clear empty states and “data not verified yet” states.
 6. Add basic SEO structure for comparison pages.
 7. Create shareable comparison URLs.
+8. Add licensed/professional watch images once the image-rights plan is settled.
 
-## Phase 3: AI-Assisted Spec Sourcing
+## Phase 3: AI Comparison And Spec Intelligence
+
+Goal: Make AI feel intentional, useful, and efficient.
+
+Completed foundation:
+
+- Built the `watch_pair_comparisons` cache table.
+- Built `/api/compare-ai` for on-demand pair comparisons.
+- Added a **Compare With AI** prompt button to the public comparison page.
+- Preserved the product rule that users must click before seeing the AI pair review.
+
+High-level next steps:
+
+1. Add `OPENAI_API_KEY` and optional `OPENAI_MODEL` to environment configuration.
+2. Test pair generation end to end with real MVP watch data.
+3. Tune the prompt and output tone so results feel premium and consistent.
+4. Add regeneration controls for stale or low-quality AI pair reviews.
+5. Consider an admin review layer for AI pair outputs before public release.
+6. Track which pair comparisons users request most often.
+
+## Phase 4: AI-Assisted Spec Sourcing
 
 Goal: Reduce manual data entry while keeping quality high.
 
@@ -109,7 +145,7 @@ High-level steps:
 5. Keep human approval before publishing canonical specs.
 6. Add auditability so each published value can be traced to its source.
 
-## Phase 4: Launch Readiness
+## Phase 5: Launch Readiness
 
 Goal: Launch a reliable public MVP.
 
@@ -127,7 +163,7 @@ High-level steps:
 7. QA the full app on desktop and mobile.
 8. Launch with a focused, high-quality watch set rather than a large incomplete catalog.
 
-## Phase 5: Traffic Growth
+## Phase 6: Traffic Growth
 
 Goal: Bring in users actively researching watches.
 
@@ -148,7 +184,7 @@ High-level steps:
 5. Build an email capture flow for saved comparisons or launch updates.
 6. Track popular searches, comparisons, and missing watches users request.
 
-## Phase 6: Affiliate Monetization
+## Phase 7: Affiliate Monetization
 
 Goal: Convert high-intent comparison traffic into revenue.
 
@@ -176,7 +212,7 @@ High-level steps:
 6. Refresh retailer price and availability where partner APIs or feeds allow it.
 7. Show “last checked” dates when availability or price is used in the product experience.
 
-## Phase 7: Paid Features
+## Phase 8: Paid Features
 
 Goal: Add recurring revenue beyond affiliate sales.
 
@@ -197,10 +233,12 @@ Potential subscription features:
 
 1. Continue filling MVP spec data in `/admin/spec-review`.
 2. Prioritize MSRP, fit dimensions, movement, water resistance, clasp, micro-adjustment, and wearability notes.
-3. Add consistent watch images for the MVP set.
-4. Build the candidate approval/promotion workflow.
-5. Commit and push the current code changes to GitHub.
-6. Polish the public comparison page once the MVP data is solid.
+3. Add `OPENAI_API_KEY` locally and test the first generated AI pair review.
+4. Tune the AI pair-review prompt and output structure.
+5. Build the candidate approval/promotion workflow.
+6. Decide on the image-rights strategy before adding real watch photos.
+7. Add licensed/professional watch images when permitted.
+8. Keep pushing meaningful milestones to GitHub.
 
 ## Strategic Positioning
 
