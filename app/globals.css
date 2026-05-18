@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #070707;
+  --foreground: #e8e4d8;
 }
 
 @theme inline {
@@ -10,11 +10,13 @@
   --color-foreground: var(--foreground);
   --color-obsidian: #070707;
   --color-charcoal: #11100e;
-  --color-champagne: #d8c391;
-  --color-platinum: #e8e4d8;
-  --color-pewter: #9b9588;
+  --color-graphite: #191713;
+  --color-champagne: #d7bd7d;
+  --color-platinum: #eee8db;
+  --color-pewter: #aaa294;
   --color-cognac: #9a6a34;
-  --shadow-aureate: 0 24px 80px rgba(0, 0, 0, 0.45);
+  --color-steel: #b7c0c0;
+  --shadow-aureate: 0 24px 80px rgba(0, 0, 0, 0.48);
   --font-sans: "Inter", "SF Pro Display", "Segoe UI", ui-sans-serif, system-ui;
   --font-serif: "Cormorant Garamond", Georgia, ui-serif, serif;
   --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
@@ -29,13 +31,53 @@
 
 body {
   background:
-    radial-gradient(circle at 15% 8%, rgba(154, 106, 52, 0.18), transparent 28rem),
-    linear-gradient(135deg, #070707 0%, #11100e 52%, #050505 100%);
+    repeating-radial-gradient(
+      circle at 18% 12%,
+      rgba(255, 255, 255, 0.03) 0 1px,
+      transparent 1px 7px
+    ),
+    repeating-linear-gradient(
+      105deg,
+      rgba(255, 255, 255, 0.026) 0 1px,
+      transparent 1px 9px
+    ),
+    repeating-linear-gradient(
+      15deg,
+      rgba(255, 255, 255, 0.018) 0 1px,
+      transparent 1px 13px
+    ),
+    radial-gradient(circle at 18% 4%, rgba(215, 189, 125, 0.1), transparent 32rem),
+    radial-gradient(circle at 80% 12%, rgba(183, 192, 192, 0.07), transparent 26rem),
+    linear-gradient(135deg, #060606 0%, #11100e 48%, #080807 100%);
+  background-attachment: fixed;
+  background-blend-mode: soft-light, overlay, normal, normal, normal, normal;
+  background-size: 34rem 34rem, 22px 22px, 34px 34px, auto, auto, auto;
   color: #e8e4d8;
   font-family: var(--font-sans);
+  min-height: 100vh;
+  position: relative;
+}
+
+body::before {
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+    linear-gradient(rgba(255, 255, 255, 0.014) 1px, transparent 1px),
+    radial-gradient(circle at center, transparent 0 45%, rgba(0, 0, 0, 0.36) 100%);
+  background-size: 72px 72px, 72px 72px, auto;
+  content: "";
+  inset: 0;
+  opacity: 0.6;
+  pointer-events: none;
+  position: fixed;
+  z-index: -1;
 }
 
 button,
 input {
   font: inherit;
+}
+
+::selection {
+  background: rgba(215, 189, 125, 0.35);
+  color: #fff8e8;
 }

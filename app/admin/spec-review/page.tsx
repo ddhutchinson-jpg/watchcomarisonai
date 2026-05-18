@@ -9,6 +9,8 @@ type WatchReviewRow = {
   collection_name: string | null;
   model_name: string | null;
   reference_number: string | null;
+  msrp: string | number | null;
+  currency: string | null;
   case_material: string | null;
   case_size_mm: string | number | null;
   case_thickness_mm: string | number | null;
@@ -53,8 +55,9 @@ const sourceTypes = [
   "unknown",
 ];
 
-const coreFields = new Set([
+const mvpFields = [
   "case_material",
+  "msrp",
   "case_size_mm",
   "case_thickness_mm",
   "lug_to_lug_mm",
@@ -67,7 +70,15 @@ const coreFields = new Set([
   "movement_type",
   "caliber",
   "power_reserve_hours",
-]);
+  "bracelet_taper_from_mm",
+  "bracelet_taper_to_mm",
+  "clasp_type",
+  "micro_adjustment_mm",
+  "adjustment_system_normalized",
+  "overall_wearability_summary",
+];
+
+const coreFields = new Set(mvpFields.slice(0, 14));
 
 function watchName(watch: WatchReviewRow) {
   return [
@@ -83,6 +94,7 @@ function watchName(watch: WatchReviewRow) {
 function missingFields(watch: WatchReviewRow) {
   return [
     !watch.case_material ? "case_material" : null,
+    !watch.msrp ? "msrp" : null,
     !watch.case_size_mm ? "case_size_mm" : null,
     !watch.case_thickness_mm ? "case_thickness_mm" : null,
     !watch.lug_to_lug_mm ? "lug_to_lug_mm" : null,
@@ -110,12 +122,8 @@ function missingFields(watch: WatchReviewRow) {
   ].filter((field): field is string => Boolean(field));
 }
 
-function defaultUnit(field: string) {
-  if (field.endsWith("_mm")) return "mm";
-  if (field.endsWith("_hours")) return "hours";
-  if (field.endsWith("_grams")) return "g";
-  if (field.endsWith("_m")) return "m";
-  return "";
+function candidateFieldOptions(missing: string[]) {
+  return [...missing, ...mvpFields.filter((field) => !missing.includes(field))];
 }
 
 async function addSpecCandidate(formData: FormData) {
@@ -224,6 +232,8 @@ async function loadReviewData() {
         "collection_name",
         "model_name",
         "reference_number",
+        "msrp",
+        "currency",
         "case_material",
         "case_size_mm",
         "case_thickness_mm",
@@ -246,6 +256,7 @@ async function loadReviewData() {
         "comfort_notes",
       ].join(","),
     )
+    .eq("is_featured", true)
     .order("brand_name", { ascending: true })
     .order("collection_name", { ascending: true })
     .order("model_name", { ascending: true })
@@ -266,7 +277,7 @@ async function loadReviewData() {
       const coreB = b.missing.filter((field) => coreFields.has(field)).length;
       return coreB - coreA || b.missing.length - a.missing.length;
     })
-    .slice(0, 25);
+    .slice(0, 100);
 
   const watchIds = incompleteWatches.map((item) => item.watch.watch_id);
   const { data: candidates, error: candidatesError } =
@@ -464,7 +475,7 @@ export default async function SpecReviewPage() {
                           className="h-11 rounded border border-white/10 bg-[#f4f0e8] px-3 text-obsidian"
                           required
                         >
-                          {missing.map((field) => (
+                          {candidateFieldOptions(missing).map((field) => (
                             <option key={field} value={field}>
                               {field}
                             </option>
@@ -485,7 +496,7 @@ export default async function SpecReviewPage() {
                           <input
                             name="candidate_unit"
                             className="h-11 rounded border border-white/10 bg-[#f4f0e8] px-3 text-obsidian"
-                            placeholder={defaultUnit(missing[0] ?? "")}
+                            placeholder="USD for MSRP, mm/g/etc."
                           />
                         </label>
 
