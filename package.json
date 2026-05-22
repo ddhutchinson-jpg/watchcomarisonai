@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "lint": "eslint .",
+    "normalize:affiliate-images": "node scripts/normalize-affiliate-images.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -13,7 +14,8 @@
     "dotenv": "^17.4.2",
     "next": "^15.3.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "sharp": "^0.34.5"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",

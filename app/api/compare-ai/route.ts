@@ -57,6 +57,26 @@ function normalizePair(watchAId: string, watchBId: string) {
   return [watchAId, watchBId].sort();
 }
 
+function pairKey(watchAId: string, watchBId: string) {
+  return normalizePair(watchAId, watchBId).join(":");
+}
+
+async function recordComparisonEvent(watchAId: string, watchBId: string) {
+  const { error } = await supabaseAdmin.from("watch_comparison_events").insert({
+    watch_a_id: watchAId,
+    watch_b_id: watchBId,
+    pair_key: pairKey(watchAId, watchBId),
+    source: "ai_compare",
+  });
+
+  if (
+    error &&
+    !["42P01", "PGRST106", "PGRST205"].includes(error.code ?? "")
+  ) {
+    throw new Error(error.message);
+  }
+}
+
 function compactWatch(watch: WatchComparisonRow) {
   return {
     watch_id: watch.watch_id,
@@ -227,6 +247,8 @@ export async function POST(request: Request) {
         { status: 404 },
       );
     }
+
+    await recordComparisonEvent(watchAId, watchBId);
 
     const hash = snapshotHash(watches);
 

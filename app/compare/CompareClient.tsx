@@ -7,6 +7,8 @@ export type Watch = {
   watch_id?: string | number | null;
   image_url?: string | null;
   primary_image_url?: string | null;
+  affiliate_url?: string | null;
+  affiliate_partner?: string | null;
   brand?: string | null;
   brand_name?: string | null;
   collection?: string | null;
@@ -26,21 +28,50 @@ export type Watch = {
   lug_width?: string | number | null;
   lug_width_mm?: string | number | null;
   weight_grams?: string | number | null;
+  crown_type?: string | null;
+  helium_escape_valve?: boolean | null;
+  caseback_type?: string | null;
+  caseback_description?: string | null;
+  bezel_type?: string | null;
+  bezel_material?: string | null;
+  bezel_insert_material?: string | null;
+  crystal_type?: string | null;
+  crystal_coating?: string | null;
+  dial_color?: string | null;
+  dial_texture?: string | null;
+  dial_finish_raw?: string | null;
+  indices_type?: string | null;
+  lume_type?: string | null;
   date_display?: boolean | null;
   has_chronograph?: boolean | null;
   has_gmt?: boolean | null;
   movement_type?: string | null;
   caliber?: string | null;
+  jewels?: string | number | null;
+  frequency_hz?: string | number | null;
+  frequency_vph?: string | number | null;
   power_reserve?: string | number | null;
   power_reserve_hours?: string | number | null;
+  accuracy_claim?: string | null;
+  cosc_certified?: boolean | null;
+  metas_certified?: boolean | null;
+  magnetic_resistance_gauss?: string | number | null;
   water_resistance?: string | number | null;
   water_resistance_m?: string | number | null;
   bracelet_taper?: string | null;
   bracelet_taper_from_mm?: string | number | null;
   bracelet_taper_to_mm?: string | number | null;
+  bracelet_type?: string | null;
+  bracelet_material?: string | null;
+  bracelet_finish_raw?: string | null;
+  link_design_raw?: string | null;
   clasp_type?: string | null;
   micro_adjustment?: string | null;
   micro_adjustment_mm?: string | number | null;
+  micro_adjustment_positions?: string | number | null;
+  adjustment_system_normalized?: string | null;
+  adjustment_system_raw?: string | null;
+  tool_free_adjustment?: boolean | null;
   wearability_notes?: string | null;
   overall_wearability_summary?: string | null;
   comfort_notes?: string | null;
@@ -82,6 +113,25 @@ const fieldSections: Array<{
       { label: "Weight", key: "weight_grams" },
       { label: "Case Material", key: "case_material" },
       { label: "Water Resistance", key: "water_resistance" },
+      { label: "Crown", key: "crown_type" },
+      { label: "Helium Valve", key: "helium_escape_valve" },
+      { label: "Caseback", key: "caseback_type" },
+      { label: "Caseback Details", key: "caseback_description" },
+    ],
+  },
+  {
+    title: "Bezel, Crystal, And Dial",
+    fields: [
+      { label: "Bezel Type", key: "bezel_type" },
+      { label: "Bezel Material", key: "bezel_material" },
+      { label: "Bezel Insert", key: "bezel_insert_material" },
+      { label: "Crystal", key: "crystal_type" },
+      { label: "Crystal Coating", key: "crystal_coating" },
+      { label: "Dial Color", key: "dial_color" },
+      { label: "Dial Texture", key: "dial_texture" },
+      { label: "Dial Finish", key: "dial_finish_raw" },
+      { label: "Indices", key: "indices_type" },
+      { label: "Lume", key: "lume_type" },
     ],
   },
   {
@@ -90,18 +140,31 @@ const fieldSections: Array<{
       { label: "Movement Type", key: "movement_type", emphasis: true },
       { label: "Caliber", key: "caliber", emphasis: true },
       { label: "Power Reserve", key: "power_reserve" },
+      { label: "Jewels", key: "jewels" },
+      { label: "Frequency", key: "frequency_vph" },
+      { label: "Accuracy", key: "accuracy_claim" },
+      { label: "COSC Certified", key: "cosc_certified" },
+      { label: "METAS Certified", key: "metas_certified" },
+      { label: "Magnetic Resistance", key: "magnetic_resistance_gauss" },
       { label: "Date", key: "date_display" },
       { label: "Chronograph", key: "has_chronograph" },
       { label: "GMT", key: "has_gmt" },
     ],
   },
   {
-    title: "Bracelet And Wearability",
+    title: "Bracelet, Clasp, And Wearability",
     fields: [
+      { label: "Bracelet Type", key: "bracelet_type" },
+      { label: "Bracelet Material", key: "bracelet_material" },
+      { label: "Bracelet Finish", key: "bracelet_finish_raw" },
+      { label: "Link Design", key: "link_design_raw" },
       { label: "Bracelet Taper", key: "bracelet_taper" },
       { label: "Clasp Type", key: "clasp_type", emphasis: true },
       { label: "Micro-Adjustment", key: "micro_adjustment", emphasis: true },
-      { label: "Wearability Notes", key: "wearability_notes" },
+      { label: "Micro-Adjustment Positions", key: "micro_adjustment_positions" },
+      { label: "Adjustment System", key: "adjustment_system_normalized" },
+      { label: "Adjustment Details", key: "adjustment_system_raw" },
+      { label: "Tool-Free Adjustment", key: "tool_free_adjustment" },
     ],
   },
 ];
@@ -136,6 +199,14 @@ function watchImageUrl(watch: Watch | null | undefined) {
   return watch?.primary_image_url ?? watch?.image_url ?? null;
 }
 
+function watchAffiliateUrl(watch: Watch | null | undefined) {
+  return watch?.affiliate_url ?? null;
+}
+
+function watchAffiliatePartner(watch: Watch | null | undefined) {
+  return watch?.affiliate_partner ?? "Retailer";
+}
+
 function withMm(value: Watch[keyof Watch]) {
   if (value === null || value === undefined || value === "") {
     return null;
@@ -168,6 +239,22 @@ function withGrams(value: Watch[keyof Watch]) {
   return `${value} g`;
 }
 
+function withVph(value: Watch[keyof Watch]) {
+  if (value === null || value === undefined || value === "") {
+    return null;
+  }
+
+  return `${value} vph`;
+}
+
+function withGauss(value: Watch[keyof Watch]) {
+  if (value === null || value === undefined || value === "") {
+    return null;
+  }
+
+  return `${value} gauss`;
+}
+
 function withCurrency(value: Watch[keyof Watch], currency = "USD") {
   if (value === null || value === undefined || value === "") {
     return null;
@@ -188,6 +275,12 @@ function withCurrency(value: Watch[keyof Watch], currency = "USD") {
 
 function normalizeNamePart(value: string | null | undefined) {
   return value?.trim().replace(/\s+/g, " ") ?? "";
+}
+
+function compareText(left?: string | null, right?: string | null) {
+  return (left ?? "").localeCompare(right ?? "", undefined, {
+    sensitivity: "base",
+  });
 }
 
 function stripRepeatedCollection(collection: string, model: string) {
@@ -260,6 +353,13 @@ function fieldValue(watch: Watch | null, key: keyof Watch) {
       return withGrams(watch.weight_grams);
     case "power_reserve":
       return watch.power_reserve ?? withHours(watch.power_reserve_hours);
+    case "frequency_vph":
+      if (watch.frequency_vph && watch.frequency_hz) {
+        return `${withVph(watch.frequency_vph)} / ${watch.frequency_hz} Hz`;
+      }
+      return withVph(watch.frequency_vph) ?? (watch.frequency_hz ? `${watch.frequency_hz} Hz` : null);
+    case "magnetic_resistance_gauss":
+      return withGauss(watch.magnetic_resistance_gauss);
     case "water_resistance":
       return watch.water_resistance ?? withMeters(watch.water_resistance_m);
     case "bracelet_taper":
@@ -273,7 +373,12 @@ function fieldValue(watch: Watch | null, key: keyof Watch) {
       }
       return null;
     case "micro_adjustment":
-      return watch.micro_adjustment ?? withMm(watch.micro_adjustment_mm);
+      return (
+        watch.micro_adjustment ??
+        withMm(watch.micro_adjustment_mm) ??
+        watch.adjustment_system_normalized ??
+        watch.adjustment_system_raw
+      );
     case "wearability_notes":
       return (
         watch.wearability_notes ??
@@ -340,6 +445,29 @@ function aiReviewText(watch: Watch | null) {
     watch?.comfort_notes ??
     null
   );
+}
+
+function reviewParagraphs(review: string | null) {
+  if (!review) {
+    return [
+      "This watch does not have an AI wearability review yet. Once the summary is added, it will appear here for a quick collector-style read.",
+    ];
+  }
+
+  const explicitParagraphs = review
+    .split(/\n{2,}/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
+
+  if (explicitParagraphs.length > 1) {
+    return explicitParagraphs;
+  }
+
+  return review
+    .replace(/\s+/g, " ")
+    .split(/(?<=\.)\s+(?=(?:A major|One of|The biggest|This watch|For many|Enthusiasts|The key|Where|In short)\b)/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
 }
 
 function AIReviewButton({ onClick }: { onClick: () => void }) {
@@ -455,31 +583,6 @@ function CollectorRead({
     return null;
   }
 
-  const caseA = parseMeasurementMm(fieldValue(watchA, "case_size"));
-  const caseB = parseMeasurementMm(fieldValue(watchB, "case_size"));
-  const lugA = parseMeasurementMm(fieldValue(watchA, "lug_to_lug"));
-  const lugB = parseMeasurementMm(fieldValue(watchB, "lug_to_lug"));
-  const thicknessA = parseMeasurementMm(fieldValue(watchA, "thickness"));
-  const thicknessB = parseMeasurementMm(fieldValue(watchB, "thickness"));
-
-  const reads = [
-    formatDelta(caseA, caseB) !== "Need both measurements"
-      ? `Diameter: ${formatDelta(caseA, caseB).toLowerCase()}.`
-      : null,
-    formatDelta(lugA, lugB) !== "Need both measurements"
-      ? `Lug-to-lug: ${formatDelta(lugA, lugB).toLowerCase()}.`
-      : null,
-    formatDelta(thicknessA, thicknessB) !== "Need both measurements"
-      ? `Thickness: ${formatDelta(thicknessA, thicknessB).toLowerCase()}.`
-      : null,
-    fieldValue(watchA, "micro_adjustment") ||
-    fieldValue(watchB, "micro_adjustment")
-      ? `Micro-adjust: A ${display(fieldValue(watchA, "micro_adjustment"))}, B ${display(
-          fieldValue(watchB, "micro_adjustment"),
-        )}.`
-      : null,
-  ].filter(Boolean);
-
   return (
     <section className="grid gap-6 border border-white/10 bg-white/[0.035] p-5 shadow-aureate sm:p-6 lg:grid-cols-[1fr_1.15fr]">
       <div>
@@ -497,7 +600,6 @@ function CollectorRead({
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
           <KeyMeasure label="Watch A" value={fieldValue(watchA, "case_size")} />
           <KeyMeasure label="Watch B" value={fieldValue(watchB, "case_size")} />
-          <KeyMeasure label="Budget" value={fieldValue(watchA, "msrp")} />
         </div>
       </div>
       <div className="border-y border-white/10 bg-black/10 px-1">
@@ -518,11 +620,6 @@ function CollectorRead({
           valueB={fieldValue(watchB, "thickness")}
           max={20}
         />
-        {reads.length ? (
-          <p className="border-t border-white/10 py-4 text-sm leading-6 text-pewter">
-            {reads.join(" ")}
-          </p>
-        ) : null}
       </div>
     </section>
   );
@@ -541,6 +638,7 @@ function SearchableWatchSelect({
 }) {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
+  const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
   const listboxId = `${label.toLowerCase().replaceAll(" ", "-")}-watch-options`;
 
   const selectedWatch = useMemo(
@@ -550,17 +648,56 @@ function SearchableWatchSelect({
     [selectedKey, watches],
   );
 
-  const filtered = useMemo(() => {
+  const brands = useMemo(() => {
+    const countByBrand = new Map<string, number>();
+
+    for (const watch of watches) {
+      const brand = watchBrand(watch) ?? "Unknown Brand";
+      countByBrand.set(brand, (countByBrand.get(brand) ?? 0) + 1);
+    }
+
+    return [...countByBrand.entries()]
+      .map(([brand, count]) => ({ brand, count }))
+      .sort((left, right) =>
+        left.brand.localeCompare(right.brand, undefined, {
+          sensitivity: "base",
+        }),
+      );
+  }, [watches]);
+
+  const filteredBrands = useMemo(() => {
     const normalized = query.trim().toLowerCase();
 
     if (!normalized) {
-    return watches.slice(0, 10);
+      return brands;
     }
 
+    return brands.filter(({ brand }) =>
+      brand.toLowerCase().includes(normalized),
+    );
+  }, [brands, query]);
+
+  const brandWatches = useMemo(() => {
+    if (!selectedBrand) {
+      return [];
+    }
+
+    const normalized = query.trim().toLowerCase();
+
     return watches
-      .filter((watch) => watchSearchText(watch).toLowerCase().includes(normalized))
-      .slice(0, 10);
-  }, [query, watches]);
+      .filter((watch) => (watchBrand(watch) ?? "Unknown Brand") === selectedBrand)
+      .filter((watch) =>
+        normalized
+          ? watchSearchText(watch).toLowerCase().includes(normalized)
+          : true,
+      )
+      .sort(
+        (left, right) =>
+          compareText(watchCollection(left), watchCollection(right)) ||
+          compareText(watchModel(left), watchModel(right)) ||
+          compareText(left.reference_number, right.reference_number),
+      );
+  }, [query, selectedBrand, watches]);
 
   return (
     <div className="relative">
@@ -574,15 +711,16 @@ function SearchableWatchSelect({
         aria-expanded={open}
         onClick={() => {
           setQuery("");
+          setSelectedBrand(null);
           setOpen((current) => !current);
         }}
         className="flex min-h-16 w-full items-center justify-between gap-4 border border-white/10 bg-[#12100d] px-4 py-3 text-left text-base font-semibold text-platinum outline-none transition hover:border-champagne/50 hover:bg-[#171410] focus:border-champagne/70 focus:bg-[#171410] focus:ring-2 focus:ring-champagne/20"
       >
         <span className="min-w-0 truncate">
-          {selectedWatch ? watchName(selectedWatch) : "Search brand, model, reference"}
+          {selectedWatch ? watchName(selectedWatch) : "Select brand, then watch"}
         </span>
         <span className="shrink-0 border-l border-white/10 pl-4 text-xs uppercase tracking-[0.18em] text-champagne" aria-hidden="true">
-          {open ? "Close" : "Search"}
+          {open ? "Close" : "Select"}
         </span>
       </button>
       {open ? (
@@ -598,34 +736,77 @@ function SearchableWatchSelect({
             spellCheck={false}
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Filter watches"
+            placeholder={selectedBrand ? "Filter watches" : "Filter brands"}
             className="mb-2 h-11 w-full border border-[#c7b57e] bg-white px-3 text-sm font-semibold text-obsidian outline-none placeholder:text-[#6f6758] focus:border-[#8d6a2d] focus:ring-2 focus:ring-[#d8c391]/50"
           />
-          {filtered.length ? (
-            filtered.map((watch, index) => (
+          {selectedBrand ? (
+            <>
               <button
-                key={watchKey(watch, index)}
                 type="button"
-                role="option"
-                aria-selected={watchKey(watch, index) === selectedKey}
-                onMouseDown={(event) => event.preventDefault()}
                 onClick={() => {
-                  onSelect(watchKey(watch, index));
-                  setOpen(false);
+                  setSelectedBrand(null);
                   setQuery("");
                 }}
-                className="block w-full bg-transparent px-3 py-3 text-left text-obsidian transition hover:bg-[#ded0a8] hover:text-obsidian focus:bg-[#ded0a8] focus:text-obsidian focus:outline-none"
+                className="mb-2 block w-full border border-[#c7b57e] bg-[#ece3cf] px-3 py-2 text-left text-xs font-bold uppercase tracking-[0.16em] text-[#6f5425] transition hover:bg-[#ded0a8] focus:bg-[#ded0a8] focus:outline-none"
+              >
+                Back to brands
+              </button>
+              {brandWatches.length ? (
+                brandWatches.map((watch, index) => (
+                  <button
+                    key={watchKey(watch, index)}
+                    type="button"
+                    role="option"
+                    aria-selected={watchKey(watch, index) === selectedKey}
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => {
+                      onSelect(watchKey(watch, index));
+                      setOpen(false);
+                      setSelectedBrand(null);
+                      setQuery("");
+                    }}
+                    className="block w-full bg-transparent px-3 py-3 text-left text-obsidian transition hover:bg-[#ded0a8] hover:text-obsidian focus:bg-[#ded0a8] focus:text-obsidian focus:outline-none"
+                  >
+                    <span className="block text-sm font-semibold text-obsidian">
+                      {watchName(watch)}
+                    </span>
+                    <span className="mt-1 block text-xs font-semibold uppercase tracking-[0.18em] text-[#6f5425]">
+                      {watch.reference_number || "Reference not listed"}
+                    </span>
+                  </button>
+                ))
+              ) : (
+                <div className="px-3 py-6 text-sm text-[#6f6758]">
+                  No watches found for {selectedBrand}.
+                </div>
+              )}
+            </>
+          ) : filteredBrands.length ? (
+            filteredBrands.map(({ brand, count }) => (
+              <button
+                key={brand}
+                type="button"
+                role="option"
+                aria-selected={false}
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => {
+                  setSelectedBrand(brand);
+                  setQuery("");
+                }}
+                className="flex w-full items-center justify-between gap-3 bg-transparent px-3 py-3 text-left text-obsidian transition hover:bg-[#ded0a8] hover:text-obsidian focus:bg-[#ded0a8] focus:text-obsidian focus:outline-none"
               >
                 <span className="block text-sm font-semibold text-obsidian">
-                  {watchName(watch)}
+                  {brand}
                 </span>
-                <span className="mt-1 block text-xs font-semibold uppercase tracking-[0.18em] text-[#6f5425]">
-                  {watch.reference_number || "Reference not listed"}
+                <span className="shrink-0 text-xs font-semibold uppercase tracking-[0.18em] text-[#6f5425]">
+                  {count} watches
                 </span>
               </button>
             ))
           ) : (
-            <div className="px-3 py-6 text-sm text-pewter">No matches found.</div>
+            <div className="px-3 py-6 text-sm text-[#6f6758]">
+              No brands found.
+            </div>
           )}
         </div>
       ) : null}
@@ -818,9 +999,10 @@ function AIReviewModal({
   }
 
   const review = aiReviewText(watch);
+  const paragraphs = reviewParagraphs(review);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 px-4 py-6 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 px-3 py-3 backdrop-blur-sm sm:px-4 sm:py-6">
       <button
         type="button"
         aria-label="Close AI review"
@@ -831,16 +1013,16 @@ function AIReviewModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="ai-review-title"
-        className="relative w-full max-w-2xl border border-champagne/25 bg-[#11100e] p-5 shadow-aureate sm:p-7"
+        className="relative flex max-h-[calc(100dvh-1.5rem)] w-full max-w-2xl flex-col overflow-hidden border border-champagne/25 bg-[#11100e] shadow-aureate sm:max-h-[calc(100dvh-3rem)]"
       >
-        <div className="flex items-start justify-between gap-5 border-b border-white/10 pb-5">
-          <div>
+        <div className="flex shrink-0 items-start justify-between gap-4 border-b border-white/10 bg-[#11100e] p-4 sm:gap-5 sm:p-6">
+          <div className="min-w-0">
             <p className="text-xs font-bold uppercase tracking-[0.28em] text-champagne">
               AI Review
             </p>
             <h2
               id="ai-review-title"
-              className="mt-3 font-serif text-4xl leading-none text-platinum"
+              className="mt-3 font-serif text-2xl leading-tight text-platinum sm:text-4xl"
             >
               {watchName(watch)}
             </h2>
@@ -851,20 +1033,21 @@ function AIReviewModal({
           <button
             type="button"
             onClick={onClose}
-            className="border border-white/10 px-3 py-2 text-xs font-bold uppercase tracking-[0.16em] text-pewter transition hover:border-champagne/40 hover:text-champagne"
+            className="shrink-0 border border-white/10 px-3 py-2 text-xs font-bold uppercase tracking-[0.16em] text-pewter transition hover:border-champagne/40 hover:text-champagne"
           >
             Close
           </button>
         </div>
 
-        <div className="mt-6 grid gap-5">
+        <div className="grid gap-5 overflow-y-auto p-4 sm:p-6">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-pewter">
             AI-generated wearability summary
           </p>
-          <p className="text-base leading-8 text-platinum">
-            {review ??
-              "This watch does not have an AI wearability review yet. Once the summary is added, it will appear here for a quick collector-style read."}
-          </p>
+          <div className="grid gap-4 text-sm leading-7 text-platinum sm:text-base sm:leading-8">
+            {paragraphs.map((paragraph) => (
+              <p key={paragraph}>{paragraph}</p>
+            ))}
+          </div>
           <p className="border-t border-white/10 pt-4 text-xs leading-5 text-pewter">
             Generated from the watch data currently available in
             WatchComparisonAI and intended as a quick review, not a substitute
@@ -999,13 +1182,95 @@ function PairComparisonPanel({
   );
 }
 
-export function CompareClient({ watches }: { watches: Watch[] }) {
+function PurchaseCard({ watch, label }: { watch: Watch | null; label: string }) {
+  const affiliateUrl = watchAffiliateUrl(watch);
+  const imageUrl = watchImageUrl(watch);
+
+  if (!watch || !affiliateUrl || !imageUrl) {
+    return null;
+  }
+
+  const partner = watchAffiliatePartner(watch);
+
+  return (
+    <a
+      href={affiliateUrl}
+      target="_blank"
+      rel="noreferrer sponsored"
+      className="group grid overflow-hidden border border-white/10 bg-white/[0.04] shadow-aureate transition hover:border-champagne/40 hover:bg-white/[0.06] sm:grid-cols-[11rem_1fr]"
+    >
+      <div
+        aria-hidden="true"
+        className="min-h-52 bg-white bg-contain bg-center bg-no-repeat sm:min-h-full"
+        style={{ backgroundImage: `url("${imageUrl}")` }}
+      />
+      <div className="flex flex-col justify-between gap-5 p-5">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-[0.24em] text-champagne/80">
+            {label} Purchase Option
+          </p>
+          <h3 className="mt-3 font-serif text-2xl leading-tight text-platinum">
+            {watchName(watch)}
+          </h3>
+          <p className="mt-2 text-xs font-semibold uppercase tracking-[0.18em] text-pewter">
+            {watch.reference_number || "Reference not listed"}
+          </p>
+          <p className="mt-4 text-sm leading-6 text-pewter">
+            Available from {partner}. Open the retailer listing to view current
+            availability, pricing, and purchase details.
+          </p>
+        </div>
+        <span className="inline-flex w-fit border border-champagne/40 px-3 py-2 text-xs font-bold uppercase tracking-[0.16em] text-champagne transition group-hover:bg-champagne group-hover:text-obsidian">
+          View Listing
+        </span>
+      </div>
+    </a>
+  );
+}
+
+function PurchaseOptionsPanel({
+  watchA,
+  watchB,
+}: {
+  watchA: Watch | null;
+  watchB: Watch | null;
+}) {
+  const hasPurchaseOption =
+    Boolean(watchAffiliateUrl(watchA) && watchImageUrl(watchA)) ||
+    Boolean(watchAffiliateUrl(watchB) && watchImageUrl(watchB));
+
+  if (!hasPurchaseOption) {
+    return null;
+  }
+
+  return (
+    <section className="grid gap-4 lg:grid-cols-2">
+      <PurchaseCard watch={watchA} label="Watch A" />
+      <PurchaseCard watch={watchB} label="Watch B" />
+    </section>
+  );
+}
+
+export function CompareClient({
+  watches,
+  defaultWatchAId,
+  defaultWatchBId,
+}: {
+  watches: Watch[];
+  defaultWatchAId?: string | null;
+  defaultWatchBId?: string | null;
+}) {
   const watchesWithMeasurements = watches.filter(hasFitMeasurements);
-  const defaultWatchA = watchesWithMeasurements[0] ?? watches[0];
+  const popularWatchA = defaultWatchAId
+    ? watches.find((watch) => watchId(watch) === defaultWatchAId)
+    : null;
+  const popularWatchB = defaultWatchBId
+    ? watches.find((watch) => watchId(watch) === defaultWatchBId)
+    : null;
+  const defaultWatchA = popularWatchA ?? watchesWithMeasurements[0] ?? watches[0];
   const defaultWatchB =
-    watchesWithMeasurements.find(
-      (watch, index) => watchKey(watch, index) !== watchKey(defaultWatchA),
-    ) ??
+    popularWatchB ??
+    watchesWithMeasurements.find((watch) => watchId(watch) !== watchId(defaultWatchA)) ??
     watchesWithMeasurements[1] ??
     watches[1];
   const [watchAKey, setWatchAKey] = useState<string | null>(
@@ -1050,9 +1315,6 @@ export function CompareClient({ watches }: { watches: Watch[] }) {
               context.
             </p>
           </div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-pewter">
-            {watches.length} active MVP watches
-          </p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
         <SearchableWatchSelect
@@ -1076,6 +1338,10 @@ export function CompareClient({ watches }: { watches: Watch[] }) {
 
       <div className="mt-6">
         <PairComparisonPanel watchA={watchA} watchB={watchB} />
+      </div>
+
+      <div className="mt-6">
+        <PurchaseOptionsPanel watchA={watchA} watchB={watchB} />
       </div>
 
       <div className="mt-6 grid gap-5 lg:grid-cols-2">
