@@ -1,8 +1,43 @@
 import { CompareClient, type Watch } from "./CompareClient";
+import type { Metadata } from "next";
 import Image from "next/image";
 import { supabaseAdmin } from "@/src/lib/supabaseAdmin";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Compare Luxury Watches",
+  description:
+    "Compare luxury watches by case size, thickness, lug-to-lug, movement, bracelet engineering, MSRP, and collector-focused wearability details.",
+  alternates: {
+    canonical: "/compare",
+  },
+  openGraph: {
+    title: "Compare Luxury Watches | WatchComparisonAI",
+    description:
+      "Choose two watches and compare collector-grade specs, proportions, movement details, and AI-assisted review notes side by side.",
+    url: "/compare",
+    images: [
+      {
+        url: "/stats-watch-dial.png",
+        width: 1024,
+        height: 1024,
+        alt: "WatchComparisonAI luxury watch dial stats graphic",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Compare Luxury Watches | WatchComparisonAI",
+    description:
+      "Compare collector-grade specs, proportions, movement details, and AI-assisted watch insights side by side.",
+    images: ["/stats-watch-dial.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+};
 
 type ComparisonEvent = {
   watch_a_id: string;

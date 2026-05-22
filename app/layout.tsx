@@ -1,9 +1,47 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://watchcomparisonai.com";
+
 export const metadata: Metadata = {
-  title: "WatchComparisonAI",
-  description: "Compare luxury watches side by side.",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "WatchComparisonAI",
+    template: "%s | WatchComparisonAI",
+  },
+  description:
+    "Compare luxury watches side by side with collector-grade specs, wearability notes, and AI-assisted comparison tools.",
+  applicationName: "WatchComparisonAI",
+  keywords: [
+    "luxury watch comparison",
+    "watch specs",
+    "watch size comparison",
+    "watch wearability",
+    "compare watches",
+    "collector watches",
+  ],
+  authors: [{ name: "WatchComparisonAI" }],
+  creator: "WatchComparisonAI",
+  publisher: "WatchComparisonAI",
+  openGraph: {
+    type: "website",
+    siteName: "WatchComparisonAI",
+    title: "WatchComparisonAI",
+    description:
+      "Compare luxury watches side by side with collector-grade specs and AI-assisted insights.",
+    url: "/",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "WatchComparisonAI",
+    description:
+      "Compare luxury watches side by side with collector-grade specs and AI-assisted insights.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({
