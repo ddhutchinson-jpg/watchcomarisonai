@@ -8,12 +8,20 @@ export default function Home() {
           <p className="text-xs font-semibold uppercase tracking-[0.32em] text-champagne">
             WatchComparisonAI
           </p>
-          <Link
-            href="/compare"
-            className="border border-champagne/40 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-champagne transition hover:bg-champagne hover:text-obsidian"
-          >
-            Compare
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/about"
+              className="border border-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-pewter transition hover:border-champagne/40 hover:text-champagne"
+            >
+              About
+            </Link>
+            <Link
+              href="/compare"
+              className="border border-champagne/40 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-champagne transition hover:bg-champagne hover:text-obsidian"
+            >
+              Compare
+            </Link>
+          </div>
         </nav>
 
         <div className="grid gap-10 py-16 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">

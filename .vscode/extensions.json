@@ -1,0 +1,8 @@
+{
+  "recommendations": [
+    "bradlc.vscode-tailwindcss",
+    "dbaeumer.vscode-eslint",
+    "GitHub.vscode-github-actions",
+    "GitHub.vscode-pull-request-github"
+  ]
+}

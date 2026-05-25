@@ -1,6 +1,7 @@
 import { CompareClient, type Watch } from "./CompareClient";
 import type { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import { supabaseAdmin } from "@/src/lib/supabaseAdmin";
 
 export const dynamic = "force-dynamic";
@@ -187,9 +188,20 @@ export default async function ComparePage() {
       <div className="mx-auto max-w-7xl">
         <header className="grid overflow-hidden border border-white/10 bg-black/25 shadow-aureate md:grid-cols-[minmax(0,1fr)_16rem]">
           <div className="flex min-h-44 flex-col justify-center p-5 sm:min-h-56 sm:p-7 md:min-h-64">
-            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-champagne">
-              WatchComparisonAI
-            </p>
+            <nav className="mb-6 flex flex-wrap items-center justify-between gap-4">
+              <Link
+                href="/"
+                className="text-xs font-semibold uppercase tracking-[0.35em] text-champagne"
+              >
+                WatchComparisonAI
+              </Link>
+              <Link
+                href="/about"
+                className="border border-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-pewter transition hover:border-champagne/40 hover:text-champagne"
+              >
+                About
+              </Link>
+            </nav>
             <h1 className="mt-6 max-w-4xl font-serif text-4xl leading-[0.98] text-platinum sm:text-5xl lg:text-6xl">
               Compare Watches With Collector-Grade Detail
             </h1>

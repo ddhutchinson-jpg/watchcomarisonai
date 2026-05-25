@@ -23,6 +23,8 @@ type PairComparison = {
   confidence_score: number;
 };
 
+const COMPARISON_PROMPT_VERSION = "2026-05-24-recommended-for-watch-labels";
+
 const comparisonSchema = {
   type: "object",
   additionalProperties: false,
@@ -92,16 +94,47 @@ function compactWatch(watch: WatchComparisonRow) {
     lug_to_lug_mm: watch.lug_to_lug_mm,
     lug_width_mm: watch.lug_width_mm,
     weight_grams: watch.weight_grams,
+    crown_type: watch.crown_type,
+    helium_escape_valve: watch.helium_escape_valve,
+    caseback_type: watch.caseback_type,
+    caseback_description: watch.caseback_description,
+    bezel_type: watch.bezel_type,
+    bezel_material: watch.bezel_material,
+    bezel_insert_material: watch.bezel_insert_material,
+    crystal_type: watch.crystal_type,
+    crystal_coating: watch.crystal_coating,
+    dial_color: watch.dial_color,
+    dial_texture: watch.dial_texture,
+    dial_finish_raw: watch.dial_finish_raw,
+    indices_type: watch.indices_type,
+    lume_type: watch.lume_type,
     water_resistance_m: watch.water_resistance_m,
     movement_type: watch.movement_type,
     caliber: watch.caliber,
+    jewels: watch.jewels,
+    frequency_hz: watch.frequency_hz,
+    frequency_vph: watch.frequency_vph,
     power_reserve_hours: watch.power_reserve_hours,
+    accuracy_claim: watch.accuracy_claim,
+    cosc_certified: watch.cosc_certified,
+    metas_certified: watch.metas_certified,
+    magnetic_resistance_gauss: watch.magnetic_resistance_gauss,
     date_display: watch.date_display,
     has_chronograph: watch.has_chronograph,
     has_gmt: watch.has_gmt,
+    bracelet_taper_from_mm: watch.bracelet_taper_from_mm,
+    bracelet_taper_to_mm: watch.bracelet_taper_to_mm,
+    bracelet_type: watch.bracelet_type,
+    bracelet_material: watch.bracelet_material,
+    bracelet_finish_raw: watch.bracelet_finish_raw,
+    link_design_raw: watch.link_design_raw,
     clasp_type: watch.clasp_type,
     micro_adjustment_mm: watch.micro_adjustment_mm,
+    micro_adjustment_positions: watch.micro_adjustment_positions,
     adjustment_system_normalized: watch.adjustment_system_normalized,
+    adjustment_system_raw: watch.adjustment_system_raw,
+    tool_free_adjustment: watch.tool_free_adjustment,
+    wearability_notes: watch.wearability_notes,
     overall_wearability_summary: watch.overall_wearability_summary,
     comfort_notes: watch.comfort_notes,
     updated_at: watch.updated_at,
@@ -109,22 +142,37 @@ function compactWatch(watch: WatchComparisonRow) {
 }
 
 function snapshotHash(watches: WatchComparisonRow[]) {
-  const payload = watches
-    .map(compactWatch)
-    .sort((a, b) => a.watch_id.localeCompare(b.watch_id));
+  const payload = {
+    prompt_version: COMPARISON_PROMPT_VERSION,
+    watches: watches
+      .map(compactWatch)
+      .sort((a, b) => a.watch_id.localeCompare(b.watch_id)),
+  };
 
   return createHash("sha256").update(JSON.stringify(payload)).digest("hex");
 }
 
 function comparisonPrompt(watches: WatchComparisonRow[]) {
-  return `Compare these two watches for an enthusiast buyer using only the provided WatchComparisonAI data.
+  return `Compare these two watches for a watch enthusiast who wants help deciding which one better fits their preferences.
 
 Rules:
-- Do not invent missing specs.
+- Use the canonical WatchComparisonAI specs and pre-existing wearability notes below as your source data.
+- Do not invent missing specs, market prices, service costs, resale behavior, accuracy claims, or brand facts not present in the data.
 - If a field is missing, say it is not yet listed instead of guessing.
-- Keep the tone confident, concise, and premium.
-- Make the recommendation useful for fit, daily wear, movement, budget/value, and enthusiast appeal.
+- Explain how listed specifications translate into real-world wearability, ownership experience, and enthusiast appeal.
+- Identify category winners only when the provided data supports a meaningful distinction. If neither watch clearly wins, call it a tie.
+- Keep the tone objective, collector-literate, and premium. Be thorough, but concise enough for an on-page comparison module.
 - Avoid saying this was cached or stored.
+
+Required response shape:
+- summary: Start with the practical buying decision in 2-4 sentences. Explain the strongest overall package when the data supports it, and note if the choice depends on priorities.
+- movement_comparison: Compare movement type, caliber, power reserve, performance/accuracy, technical sophistication, serviceability, and long-term reliability when listed. End with "Winner:" or "Winner: Tie" based only on listed data.
+- fit_comparison: Compare case diameter, thickness, lug-to-lug, weight, wrist presence, comfort, and suitability for different wrist sizes. Include the pre-existing wearability summaries when present. End with "Winner:" or "Winner: Tie".
+- daily_wear_comparison: Compare dial/legibility, lume, materials, finishing, bracelet/strap, clasp, water resistance, complications, travel/sports suitability, and everyday practicality. End with "Winner:" or "Winner: Tie".
+- value_comparison: Compare MSRP/value, brand and heritage signals available in the data, ownership practicality, durability, maintenance expectations, and collector appeal. Do not discuss current market price or resale unless listed. End with "Winner:" or "Winner: Tie".
+- enthusiast_take: Include concise pros and cons for each watch, a category scorecard out of 10 for Movement, Case & Wearability, Dial & Legibility, Materials & Finishing, Features & Functionality, Brand & Heritage, Value Proposition, and Ownership Experience, then give a final verdict that weighs the categories collectively rather than simply counting wins.
+- recommended_for: 2-5 short recommendations that distinguish buyer priorities, such as technical superiority, craftsmanship, design, daily practicality, value, collector interest, or wrist fit. Each item must begin with the recommended watch name, or "Either watch:" if the recommendation applies to both.
+- confidence_score: Set 0.25-0.45 when many important specs are missing, 0.45-0.7 when the comparison is partially supported, and 0.7-0.95 only when the data is rich enough for a strong recommendation.
 
 Watch data:
 ${JSON.stringify(watches.map(compactWatch), null, 2)}`;
@@ -187,7 +235,7 @@ async function generateComparison(watches: WatchComparisonRow[]) {
           schema: comparisonSchema,
         },
       },
-      max_output_tokens: 900,
+      max_output_tokens: 1600,
     }),
   });
 

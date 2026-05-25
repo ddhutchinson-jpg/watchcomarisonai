@@ -1,6 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
+import {
+  normalizeNamePart,
+  watchDisplayName,
+  watchSlug,
+} from "@/src/lib/watchRoutes";
 
 export type Watch = {
   id?: string | number | null;
@@ -273,40 +279,14 @@ function withCurrency(value: Watch[keyof Watch], currency = "USD") {
   }).format(numericValue);
 }
 
-function normalizeNamePart(value: string | null | undefined) {
-  return value?.trim().replace(/\s+/g, " ") ?? "";
-}
-
 function compareText(left?: string | null, right?: string | null) {
   return (left ?? "").localeCompare(right ?? "", undefined, {
     sensitivity: "base",
   });
 }
 
-function stripRepeatedCollection(collection: string, model: string) {
-  const normalizedCollection = collection.toLowerCase();
-  const normalizedModel = model.toLowerCase();
-
-  if (normalizedModel === normalizedCollection) {
-    return "";
-  }
-
-  if (normalizedModel.startsWith(`${normalizedCollection} `)) {
-    return model.slice(collection.length).trim();
-  }
-
-  return model;
-}
-
 function watchName(watch: Watch) {
-  const brand = normalizeNamePart(watchBrand(watch));
-  const collection = normalizeNamePart(watchCollection(watch));
-  const model = stripRepeatedCollection(
-    collection,
-    normalizeNamePart(watchModel(watch)),
-  );
-
-  return [brand, collection, model].filter(Boolean).join(" ");
+  return watchDisplayName(watch);
 }
 
 function watchSearchText(watch: Watch) {
@@ -436,50 +416,6 @@ function formatDelta(valueA: number | null, valueB: number | null) {
 
   const larger = valueA > valueB ? "Watch A" : "Watch B";
   return `${larger} +${delta.toFixed(1)} mm`;
-}
-
-function aiReviewText(watch: Watch | null) {
-  return (
-    watch?.overall_wearability_summary ??
-    watch?.wearability_notes ??
-    watch?.comfort_notes ??
-    null
-  );
-}
-
-function reviewParagraphs(review: string | null) {
-  if (!review) {
-    return [
-      "This watch does not have an AI wearability review yet. Once the summary is added, it will appear here for a quick collector-style read.",
-    ];
-  }
-
-  const explicitParagraphs = review
-    .split(/\n{2,}/)
-    .map((paragraph) => paragraph.trim())
-    .filter(Boolean);
-
-  if (explicitParagraphs.length > 1) {
-    return explicitParagraphs;
-  }
-
-  return review
-    .replace(/\s+/g, " ")
-    .split(/(?<=\.)\s+(?=(?:A major|One of|The biggest|This watch|For many|Enthusiasts|The key|Where|In short)\b)/)
-    .map((paragraph) => paragraph.trim())
-    .filter(Boolean);
-}
-
-function AIReviewButton({ onClick }: { onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="inline-flex w-fit border border-champagne/40 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-champagne transition hover:bg-champagne hover:text-obsidian focus:bg-champagne focus:text-obsidian focus:outline-none focus:ring-2 focus:ring-champagne/30"
-    >
-      AI Review
-    </button>
-  );
 }
 
 function KeyMeasure({
@@ -817,11 +753,9 @@ function SearchableWatchSelect({
 function WatchCard({
   watch,
   label,
-  onOpenReview,
 }: {
   watch: Watch | null;
   label: string;
-  onOpenReview: (watch: Watch) => void;
 }) {
   if (!watch) {
     return (
@@ -838,59 +772,17 @@ function WatchCard({
 
   return (
     <section className="overflow-hidden border border-white/10 bg-white/[0.045] shadow-aureate">
-      <div className="relative grid min-h-[21rem] border-b border-white/10 bg-[#11100e] sm:grid-cols-[4rem_1fr]">
-        <div className="hidden border-r border-white/10 bg-black/20 px-3 py-5 sm:block">
-          <p className="text-xs font-bold uppercase tracking-[0.28em] text-champagne/70 [writing-mode:vertical-rl]">
-            {label}
-          </p>
-        </div>
-        <div className="relative overflow-hidden p-6 sm:p-7">
-          <div className="absolute inset-0 opacity-60 [background:repeating-radial-gradient(circle_at_center,rgba(255,255,255,0.04)_0_1px,transparent_1px_10px)]" />
-          <div className="absolute inset-0 opacity-30 [background:repeating-linear-gradient(115deg,rgba(255,255,255,0.04)_0_1px,transparent_1px_12px)]" />
-          <div className="absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10" />
-          <div className="absolute left-1/2 top-1/2 h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded-full border border-champagne/15" />
-          <div className="relative flex h-full min-h-[17rem] flex-col justify-between">
-            <div className="flex items-start justify-between gap-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-champagne/80">
-                {watch.reference_number || "Reference not listed"}
-              </p>
-            </div>
-            <div className="grid gap-3 sm:grid-cols-3">
-              <div>
-                <p className="text-[0.68rem] uppercase tracking-[0.18em] text-pewter">
-                  Case
-                </p>
-                <p className="mt-1 font-serif text-4xl leading-none text-platinum">
-                  {display(fieldValue(watch, "case_size"))}
-                </p>
-              </div>
-              <div>
-                <p className="text-[0.68rem] uppercase tracking-[0.18em] text-pewter">
-                  Thick
-                </p>
-                <p className="mt-1 font-serif text-4xl leading-none text-platinum">
-                  {display(fieldValue(watch, "thickness"))}
-                </p>
-              </div>
-              <div>
-                <p className="text-[0.68rem] uppercase tracking-[0.18em] text-pewter">
-                  Water
-                </p>
-                <p className="mt-1 font-serif text-4xl leading-none text-platinum">
-                  {display(fieldValue(watch, "water_resistance"))}
-                </p>
-              </div>
-            </div>
-            <div className="h-px bg-white/10" />
-          </div>
-        </div>
-      </div>
       <div className="p-5 sm:p-6">
         <div className="flex items-start justify-between gap-4">
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-champagne/70">
             {label}
           </p>
-          <AIReviewButton onClick={() => onOpenReview(watch)} />
+          <Link
+            href={`/watches/${watchSlug(watch)}`}
+            className="inline-flex w-fit border border-champagne/40 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-champagne transition hover:bg-champagne hover:text-obsidian focus:bg-champagne focus:text-obsidian focus:outline-none focus:ring-2 focus:ring-champagne/30"
+          >
+            View Details
+          </Link>
         </div>
         <div className="mt-4">
           <WatchIdentity watch={watch} />
@@ -943,11 +835,6 @@ function ComparisonTable({
 }) {
   return (
     <section className="mt-6 overflow-hidden border border-white/10 bg-white/[0.045] shadow-aureate">
-      <div className="grid grid-cols-[7.5rem_1fr_1fr] border-b border-white/10 bg-black/30 text-xs font-semibold uppercase tracking-[0.2em] text-champagne/80 sm:grid-cols-[12rem_1fr_1fr]">
-        <div className="px-3 py-4 sm:px-5">Spec</div>
-        <div className="px-3 py-4 sm:px-5">Watch A</div>
-        <div className="px-3 py-4 sm:px-5">Watch B</div>
-      </div>
       <div>
         {fieldSections.map((section) => (
           <section key={section.title} className="border-b border-white/10 last:border-b-0">
@@ -987,74 +874,523 @@ function ComparisonTable({
   );
 }
 
-function AIReviewModal({
-  watch,
-  onClose,
-}: {
-  watch: Watch | null;
-  onClose: () => void;
-}) {
+function normalizeRecommendationText(value: string | null | undefined) {
+  return normalizeNamePart(value).toLowerCase();
+}
+
+function recommendationMatchesWatch(item: string, watch: Watch | null) {
   if (!watch) {
+    return false;
+  }
+
+  const itemText = normalizeRecommendationText(item);
+  const name = normalizeRecommendationText(watchName(watch));
+  const reference = normalizeRecommendationText(watch.reference_number);
+  const brand = normalizeRecommendationText(watchBrand(watch));
+  const model = normalizeRecommendationText(watchModel(watch));
+
+  return Boolean(
+    (name && (itemText.startsWith(name) || itemText.includes(name))) ||
+      (reference && itemText.includes(reference)) ||
+      (brand && model && itemText.includes(brand) && itemText.includes(model)),
+  );
+}
+
+function recommendationCopy(item: string) {
+  const separatorIndex = item.indexOf(":");
+
+  if (separatorIndex === -1) {
+    return capitalizeFirstLetter(item);
+  }
+
+  return capitalizeFirstLetter(item.slice(separatorIndex + 1).trim());
+}
+
+function capitalizeFirstLetter(value: string) {
+  const trimmed = value.trim();
+
+  if (!trimmed) {
+    return trimmed;
+  }
+
+  return trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
+}
+
+function groupedRecommendations(
+  items: string[],
+  watchA: Watch | null,
+  watchB: Watch | null,
+) {
+  return items.reduce(
+    (groups, item) => {
+      const normalized = normalizeRecommendationText(item);
+
+      if (normalized.startsWith("either watch")) {
+        groups.either.push(recommendationCopy(item));
+      } else if (recommendationMatchesWatch(item, watchA)) {
+        groups.watchA.push(recommendationCopy(item));
+      } else if (recommendationMatchesWatch(item, watchB)) {
+        groups.watchB.push(recommendationCopy(item));
+      } else {
+        groups.either.push(item);
+      }
+
+      return groups;
+    },
+    { watchA: [] as string[], watchB: [] as string[], either: [] as string[] },
+  );
+}
+
+function recommendationIcon(item: string) {
+  const text = normalizeRecommendationText(item);
+
+  if (/\b(msrp|price|cost|value|money|budget|affordable|overpriced|undervalued)\b/.test(text)) {
+    return "💰";
+  }
+
+  if (/\b(dial|design|style|aesthetic|visual|look|finishing|finish|polished|luxury feel)\b/.test(text)) {
+    return "⌚";
+  }
+
+  if (/\b(movement|caliber|accuracy|power reserve|spring drive|quartz|automatic|manual|cosc|metas|technical|engineering)\b/.test(text)) {
+    return "⚙️";
+  }
+
+  if (/\b(wrist|fit|comfort|wear|wearability|smaller|larger|diameter|thickness|lug|lightweight|weight)\b/.test(text)) {
+    return "👌";
+  }
+
+  if (/\b(dive|diver|water|sports|sport|travel|gmt|practical|daily|versatile|utility|micro-adjustment)\b/.test(text)) {
+    return "🧭";
+  }
+
+  if (/\b(collector|collectors|heritage|prestige|brand|reputation|desirability|enthusiast|icon|cachet)\b/.test(text)) {
+    return "🏆";
+  }
+
+  return "💎";
+}
+
+const scorecardCategories = [
+  "Movement",
+  "Case & Wearability",
+  "Dial & Legibility",
+  "Materials & Finishing",
+  "Features & Functionality",
+  "Brand & Heritage",
+  "Value Proposition",
+  "Ownership Experience",
+];
+
+type ScorecardRow = {
+  category: string;
+  watchA: number | null;
+  watchB: number | null;
+};
+
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function scoreAliases(watch: Watch | null) {
+  if (!watch) {
+    return [];
+  }
+
+  return [
+    watchName(watch),
+    watch.reference_number,
+    watchBrand(watch),
+    watchCollection(watch),
+    watchModel(watch),
+  ]
+    .map((value) => normalizeNamePart(value))
+    .filter((value, index, values) => value && values.indexOf(value) === index);
+}
+
+function findLastAliasIndex(text: string, aliases: string[]) {
+  const normalized = text.toLowerCase();
+
+  return aliases.reduce((lastIndex, alias) => {
+    const index = normalized.lastIndexOf(alias.toLowerCase());
+    return Math.max(lastIndex, index);
+  }, -1);
+}
+
+function scoreBlockOwner(
+  precedingText: string,
+  watchA: Watch | null,
+  watchB: Watch | null,
+) {
+  const watchAIndex = findLastAliasIndex(precedingText, scoreAliases(watchA));
+  const watchBIndex = findLastAliasIndex(precedingText, scoreAliases(watchB));
+
+  if (watchAIndex === watchBIndex) {
     return null;
   }
 
-  const review = aiReviewText(watch);
-  const paragraphs = reviewParagraphs(review);
+  return watchAIndex > watchBIndex ? "watchA" : "watchB";
+}
+
+function scoreSectionOwner(
+  section: string,
+  watchA: Watch | null,
+  watchB: Watch | null,
+) {
+  const heading = section.split(/\n+/)[0] ?? section;
+  const watchAIndex = findLastAliasIndex(heading, scoreAliases(watchA));
+  const watchBIndex = findLastAliasIndex(heading, scoreAliases(watchB));
+
+  if (watchAIndex === watchBIndex) {
+    return null;
+  }
+
+  return watchAIndex > watchBIndex ? "watchA" : "watchB";
+}
+
+function parseCategoryScore(block: string, category: string) {
+  const match = block.match(
+    new RegExp(`${escapeRegExp(category)}\\s*(?:[:\\-])?\\s*(\\d+(?:\\.\\d+)?)\\s*(?:/\\s*10)?`, "i"),
+  );
+
+  if (!match) {
+    return null;
+  }
+
+  const score = Number.parseFloat(match[1]);
+  return Number.isFinite(score) ? score : null;
+}
+
+function findScoreAfterAlias(text: string, aliases: string[]) {
+  const normalized = text.toLowerCase();
+
+  for (const alias of aliases) {
+    const index = normalized.indexOf(alias.toLowerCase());
+
+    if (index === -1) {
+      continue;
+    }
+
+    const afterAlias = text.slice(index + alias.length);
+    const match = afterAlias.match(/(\d+(?:\.\d+)?)\s*(?:\/\s*10)?/);
+
+    if (match) {
+      const score = Number.parseFloat(match[1]);
+      return Number.isFinite(score) ? score : null;
+    }
+  }
+
+  return null;
+}
+
+function parseScorecard(
+  text: string | null | undefined,
+  watchA: Watch | null,
+  watchB: Watch | null,
+) {
+  if (!text) {
+    return [];
+  }
+
+  const rows = scorecardCategories.map<ScorecardRow>((category) => ({
+    category,
+    watchA: null,
+    watchB: null,
+  }));
+  const watchAAliases = scoreAliases(watchA);
+  const watchBAliases = scoreAliases(watchB);
+  const sections = text
+    .split(/\n\s*\n+/)
+    .map((section) => section.trim())
+    .filter(Boolean);
+
+  for (const section of sections) {
+    const scorecardMatch = section.match(/scorecard:\s*([\s\S]*)/i);
+
+    if (!scorecardMatch) {
+      continue;
+    }
+
+    const owner = scoreSectionOwner(section, watchA, watchB);
+
+    for (const row of rows) {
+      const score = parseCategoryScore(scorecardMatch[1], row.category);
+
+      if (score === null) {
+        continue;
+      }
+
+      if (owner === "watchA") {
+        row.watchA = score;
+      } else if (owner === "watchB") {
+        row.watchB = score;
+      }
+    }
+  }
+
+  const scorecardRegex = /scorecard:\s*([\s\S]*?)(?=\n\s*\n|final verdict:|$)/gi;
+  let scorecardMatch: RegExpExecArray | null;
+
+  while ((scorecardMatch = scorecardRegex.exec(text))) {
+    const block = scorecardMatch[1];
+    const owner = scoreBlockOwner(
+      text.slice(Math.max(0, scorecardMatch.index - 500), scorecardMatch.index),
+      watchA,
+      watchB,
+    );
+
+    for (const row of rows) {
+      const score = parseCategoryScore(block, row.category);
+
+      if (score === null) {
+        continue;
+      }
+
+      if (owner === "watchA" && row.watchA === null) {
+        row.watchA = score;
+      } else if (owner === "watchB" && row.watchB === null) {
+        row.watchB = score;
+      }
+    }
+  }
+
+  for (const row of rows) {
+    if (row.watchA !== null && row.watchB !== null) {
+      continue;
+    }
+
+    const categoryMatch = text.match(
+      new RegExp(`${escapeRegExp(row.category)}\\s*:\\s*([^\\n]+)`, "i"),
+    );
+
+    if (!categoryMatch) {
+      continue;
+    }
+
+    row.watchA ??= findScoreAfterAlias(categoryMatch[1], watchAAliases);
+    row.watchB ??= findScoreAfterAlias(categoryMatch[1], watchBAliases);
+  }
+
+  return rows.filter((row) => row.watchA !== null || row.watchB !== null);
+}
+
+function scoreWidth(score: number | null) {
+  return `${Math.max(0, Math.min(100, ((score ?? 0) / 10) * 100))}%`;
+}
+
+function formatScore(score: number | null) {
+  return score === null ? "--" : score.toFixed(1);
+}
+
+function cleanVerdictText(text: string | null | undefined) {
+  if (!text) {
+    return null;
+  }
+
+  const lines = text
+    .split(/\n+/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  const keptLines = lines.filter((line, index) => {
+    if (/^(pros|cons|scorecard)\s*:/i.test(line)) {
+      return false;
+    }
+
+    if (/^scorecard\b/i.test(line)) {
+      return false;
+    }
+
+    const nextLine = lines[index + 1];
+    if (nextLine && /^pros\s*:/i.test(nextLine)) {
+      return false;
+    }
+
+    return true;
+  });
+
+  return keptLines
+    .join("\n")
+    .replace(/\bPros:\s*[\s\S]*?(?=\bCons:|\bScorecard:|\bFinal verdict:|$)/gi, "")
+    .replace(/\bCons:\s*[\s\S]*?(?=\bScorecard:|\bFinal verdict:|$)/gi, "")
+    .replace(/\bScorecard:\s*[\s\S]*?(?=\bFinal verdict:|$)/gi, "")
+    .trim() || null;
+}
+
+function Scorecard({
+  rows,
+  watchA,
+  watchB,
+}: {
+  rows: ScorecardRow[];
+  watchA: Watch | null;
+  watchB: Watch | null;
+}) {
+  if (!rows.length) {
+    return null;
+  }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 px-3 py-3 backdrop-blur-sm sm:px-4 sm:py-6">
-      <button
-        type="button"
-        aria-label="Close AI review"
-        className="absolute inset-0 cursor-default"
-        onClick={onClose}
-      />
-      <section
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="ai-review-title"
-        className="relative flex max-h-[calc(100dvh-1.5rem)] w-full max-w-2xl flex-col overflow-hidden border border-champagne/25 bg-[#11100e] shadow-aureate sm:max-h-[calc(100dvh-3rem)]"
-      >
-        <div className="flex shrink-0 items-start justify-between gap-4 border-b border-white/10 bg-[#11100e] p-4 sm:gap-5 sm:p-6">
-          <div className="min-w-0">
-            <p className="text-xs font-bold uppercase tracking-[0.28em] text-champagne">
-              AI Review
-            </p>
-            <h2
-              id="ai-review-title"
-              className="mt-3 font-serif text-2xl leading-tight text-platinum sm:text-4xl"
-            >
-              {watchName(watch)}
-            </h2>
-            <p className="mt-2 text-xs font-semibold uppercase tracking-[0.2em] text-pewter">
-              {watch.reference_number || "Reference not listed"}
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="shrink-0 border border-white/10 px-3 py-2 text-xs font-bold uppercase tracking-[0.16em] text-pewter transition hover:border-champagne/40 hover:text-champagne"
-          >
-            Close
-          </button>
+    <div className="grid gap-4 border border-white/10 bg-black/20 p-4 sm:p-5">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-champagne/80">
+            Scorecard
+          </p>
+          <h3 className="mt-2 font-serif text-2xl leading-tight text-platinum">
+            Category scores out of 10
+          </h3>
         </div>
+      </div>
 
-        <div className="grid gap-5 overflow-y-auto p-4 sm:p-6">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-pewter">
-            AI-generated wearability summary
-          </p>
-          <div className="grid gap-4 text-sm leading-7 text-platinum sm:text-base sm:leading-8">
-            {paragraphs.map((paragraph) => (
-              <p key={paragraph}>{paragraph}</p>
-            ))}
+      <div className="grid gap-3">
+        <div className="grid gap-2 md:grid-cols-[12rem_1fr_1fr] md:items-end">
+          <span />
+          <div className="border border-champagne/35 px-3 py-2">
+            <p className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-champagne/80">
+              Watch A
+            </p>
+            <p className="mt-1 text-sm font-semibold leading-5 text-platinum">
+              {watchA ? watchName(watchA) : "Watch A"}
+            </p>
           </div>
-          <p className="border-t border-white/10 pt-4 text-xs leading-5 text-pewter">
-            Generated from the watch data currently available in
-            WatchComparisonAI and intended as a quick review, not a substitute
-            for manually verified specs.
-          </p>
+          <div className="border border-cognac/45 px-3 py-2">
+            <p className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cognac/90">
+              Watch B
+            </p>
+            <p className="mt-1 text-sm font-semibold leading-5 text-platinum">
+              {watchB ? watchName(watchB) : "Watch B"}
+            </p>
+          </div>
         </div>
-      </section>
+        {rows.map((row) => {
+          const watchAWins = row.watchA !== null && row.watchB !== null && row.watchA > row.watchB;
+          const watchBWins = row.watchA !== null && row.watchB !== null && row.watchB > row.watchA;
+
+          return (
+            <div key={row.category} className="grid gap-2 border-t border-white/10 pt-3 first:border-t-0 first:pt-0 md:grid-cols-[12rem_1fr_1fr] md:items-center">
+              <p className="text-sm font-semibold text-platinum">{row.category}</p>
+              <div>
+                <div className="mb-1 flex items-center justify-between gap-3 text-xs uppercase tracking-[0.14em] text-pewter">
+                  <span className="md:hidden">Watch A</span>
+                  <span className={watchAWins ? "text-champagne" : "text-platinum"}>{formatScore(row.watchA)}</span>
+                </div>
+                <div className="h-2 overflow-hidden bg-white/10">
+                  <div className="h-full bg-champagne" style={{ width: scoreWidth(row.watchA) }} />
+                </div>
+              </div>
+              <div>
+                <div className="mb-1 flex items-center justify-between gap-3 text-xs uppercase tracking-[0.14em] text-pewter">
+                  <span className="md:hidden">Watch B</span>
+                  <span className={watchBWins ? "text-cognac" : "text-platinum"}>{formatScore(row.watchB)}</span>
+                </div>
+                <div className="h-2 overflow-hidden bg-white/10">
+                  <div className="h-full bg-cognac" style={{ width: scoreWidth(row.watchB) }} />
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function DecisionSummary({
+  recommendations,
+  watchA,
+  watchB,
+}: {
+  recommendations: string[];
+  watchA: Watch | null;
+  watchB: Watch | null;
+}) {
+  const groups = groupedRecommendations(recommendations, watchA, watchB);
+  const columns = [
+    {
+      key: "watch-a",
+      label: "Watch A",
+      name: watchA ? watchName(watchA) : "Watch A",
+      items: groups.watchA,
+      border: "border-champagne/35",
+    },
+    {
+      key: "watch-b",
+      label: "Watch B",
+      name: watchB ? watchName(watchB) : "Watch B",
+      items: groups.watchB,
+      border: "border-cognac/45",
+    },
+  ];
+
+  return (
+    <div className="grid gap-4 border border-white/10 bg-black/20 p-4 sm:p-5">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-champagne/80">
+            Decision snapshot
+          </p>
+          <h3 className="mt-2 font-serif text-2xl leading-tight text-platinum">
+            Best suited for
+          </h3>
+        </div>
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2">
+        {columns.map((column) => (
+          <section
+            key={column.key}
+            className={`border ${column.border} bg-white/[0.035] p-4`}
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-pewter">
+                  {column.label}
+                </p>
+                <h4 className="mt-2 text-base font-semibold leading-6 text-platinum">
+                  {column.name}
+                </h4>
+              </div>
+            </div>
+            <ul className="mt-4 grid gap-2 text-sm leading-6 text-pewter">
+              {column.items.length ? (
+                column.items.map((item) => (
+                  <li key={item} className="grid grid-cols-[1.5rem_1fr] gap-2">
+                    <span aria-hidden="true" className="text-base leading-6">
+                      {recommendationIcon(item)}
+                    </span>
+                    <span>{item}</span>
+                  </li>
+                ))
+              ) : (
+                <li className="grid grid-cols-[1.5rem_1fr] gap-2">
+                  <span aria-hidden="true" className="text-base leading-6">
+                    🕰️
+                  </span>
+                  <span>No explicit buyer-fit points for this watch yet.</span>
+                </li>
+              )}
+            </ul>
+          </section>
+        ))}
+      </div>
+
+      {groups.either.length ? (
+        <section className="border border-white/10 bg-white/[0.025] p-4">
+          <p className="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-pewter">
+            Either watch
+          </p>
+          <ul className="mt-3 grid gap-2 text-sm leading-6 text-pewter sm:grid-cols-2">
+            {groups.either.map((item) => (
+              <li key={item} className="grid grid-cols-[1.5rem_1fr] gap-2">
+                <span aria-hidden="true" className="text-base leading-6">
+                  {recommendationIcon(item)}
+                </span>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
     </div>
   );
 }
@@ -1072,6 +1408,12 @@ function PairComparisonPanel({
   const aId = watchId(watchA);
   const bId = watchId(watchB);
   const canCompare = Boolean(aId && bId && aId !== bId);
+  const scorecardRows = parseScorecard(
+    comparison?.enthusiast_take,
+    watchA,
+    watchB,
+  );
+  const verdictText = cleanVerdictText(comparison?.enthusiast_take);
 
   async function compareWithAI() {
     if (!aId || !bId || aId === bId) return;
@@ -1115,12 +1457,13 @@ function PairComparisonPanel({
             AI Pair Review
           </p>
           <h2 className="mt-3 font-serif text-3xl leading-tight text-platinum sm:text-4xl">
-            Ask AI for the tradeoffs between these two watches.
+            Ask AI for a head-to-head enthusiast verdict.
           </h2>
           <p className="mt-3 max-w-3xl text-sm leading-6 text-pewter">
-            The response is generated only when prompted. If this pair has been
-            reviewed before and the specs have not changed, WatchComparisonAI
-            reuses the saved review behind the scenes.
+            Scores are based on the saved specs and wearability notes for these
+            two watches, then weighted against enthusiast priorities like fit,
+            movement quality, practicality, finishing, value, and collector
+            appeal.
           </p>
         </div>
         <button
@@ -1144,10 +1487,10 @@ function PairComparisonPanel({
           <p className="text-base leading-7 text-platinum">{comparison.summary}</p>
           <div className="grid gap-px bg-white/10 md:grid-cols-2">
             {[
-              ["Fit", comparison.fit_comparison],
               ["Movement", comparison.movement_comparison],
-              ["Value", comparison.value_comparison],
-              ["Daily Wear", comparison.daily_wear_comparison],
+              ["Case & Wearability", comparison.fit_comparison],
+              ["Daily Use, Dial & Materials", comparison.daily_wear_comparison],
+              ["Brand, Ownership & Value", comparison.value_comparison],
             ].map(([label, value]) => (
               <div key={label} className="bg-[#100f0d] p-4">
                 <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-champagne/80">
@@ -1159,22 +1502,18 @@ function PairComparisonPanel({
               </div>
             ))}
           </div>
-          {comparison.enthusiast_take ? (
-            <p className="border-l border-champagne/40 pl-4 text-sm leading-6 text-pewter">
-              {comparison.enthusiast_take}
+          <Scorecard rows={scorecardRows} watchA={watchA} watchB={watchB} />
+          {verdictText ? (
+            <p className="whitespace-pre-line border-l border-champagne/40 pl-4 text-sm leading-6 text-pewter">
+              {verdictText}
             </p>
           ) : null}
           {comparison.recommended_for?.length ? (
-            <div className="flex flex-wrap gap-2">
-              {comparison.recommended_for.map((item) => (
-                <span
-                  key={item}
-                  className="border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-pewter"
-                >
-                  {item}
-                </span>
-              ))}
-            </div>
+            <DecisionSummary
+              recommendations={comparison.recommended_for}
+              watchA={watchA}
+              watchB={watchB}
+            />
           ) : null}
         </div>
       ) : null}
@@ -1279,8 +1618,6 @@ export function CompareClient({
   const [watchBKey, setWatchBKey] = useState<string | null>(
     defaultWatchB ? watchKey(defaultWatchB, 1) : null,
   );
-  const [reviewWatch, setReviewWatch] = useState<Watch | null>(null);
-
   const watchA = useMemo(
     () =>
       watches.find((watch, index) => watchKey(watch, index) === watchAKey) ??
@@ -1345,20 +1682,11 @@ export function CompareClient({
       </div>
 
       <div className="mt-6 grid gap-5 lg:grid-cols-2">
-        <WatchCard
-          label="Watch A"
-          watch={watchA}
-          onOpenReview={setReviewWatch}
-        />
-        <WatchCard
-          label="Watch B"
-          watch={watchB}
-          onOpenReview={setReviewWatch}
-        />
+        <WatchCard label="Watch A" watch={watchA} />
+        <WatchCard label="Watch B" watch={watchB} />
       </div>
 
       <ComparisonTable watchA={watchA} watchB={watchB} />
-      <AIReviewModal watch={reviewWatch} onClose={() => setReviewWatch(null)} />
     </>
   );
 }
