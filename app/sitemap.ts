@@ -3,7 +3,7 @@ import { supabaseAdmin } from "@/src/lib/supabaseAdmin";
 import { watchSlug, type WatchRouteParts } from "@/src/lib/watchRoutes";
 
 const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://watchcomparisonai.com";
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://watchcompareai.com";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
