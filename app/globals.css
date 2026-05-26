@@ -29,6 +29,10 @@
   }
 }
 
+html {
+  background: #070707;
+}
+
 body {
   background:
     repeating-radial-gradient(
@@ -70,6 +74,18 @@ body::before {
   pointer-events: none;
   position: fixed;
   z-index: -1;
+}
+
+@media (max-width: 767px) {
+  body {
+    background-attachment: scroll;
+    background-color: #070707;
+  }
+
+  body::before {
+    opacity: 0.32;
+    position: absolute;
+  }
 }
 
 button,
