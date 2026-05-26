@@ -35,14 +35,38 @@ const methodSteps = [
 ];
 
 const scoreCategories = [
-  "Movement",
-  "Case & Wearability",
-  "Dial & Legibility",
-  "Materials & Finishing",
-  "Features & Functionality",
-  "Brand & Heritage",
-  "Value Proposition",
-  "Ownership Experience",
+  {
+    title: "Movement",
+    body: "Rates the caliber type, accuracy claims, power reserve, technical sophistication, serviceability, and long-term reliability implied by the saved specs.",
+  },
+  {
+    title: "Case & Wearability",
+    body: "Evaluates diameter, thickness, lug-to-lug span, case shape, weight, bracelet or strap setup, and how those dimensions translate to comfort on different wrists.",
+  },
+  {
+    title: "Dial & Legibility",
+    body: "Looks at dial layout, hand and marker contrast, date placement, lume information, visual balance, and how quickly the watch can be read in everyday use.",
+  },
+  {
+    title: "Materials & Finishing",
+    body: "Weighs case metal, crystal, bezel material, bracelet construction, clasp quality, finishing variety, and whether the execution feels appropriate for the price tier.",
+  },
+  {
+    title: "Features & Functionality",
+    body: "Measures practical capability such as water resistance, complications, travel or sport utility, magnetic resistance, timing bezels, micro-adjustment, and everyday convenience.",
+  },
+  {
+    title: "Brand & Heritage",
+    body: "Considers brand reputation, historical relevance, model-line significance, manufacturing credibility, collector awareness, and the prestige attached to ownership.",
+  },
+  {
+    title: "Value Proposition",
+    body: "Compares what the watch offers for its MSRP or saved market context, including movement quality, finishing, features, brand strength, and ownership upside for the money.",
+  },
+  {
+    title: "Ownership Experience",
+    body: "Assesses the likely daily experience after purchase: durability, versatility, maintenance expectations, resale confidence, service access, and how easy the watch is to live with.",
+  },
 ];
 
 export default function AboutPage() {
@@ -125,11 +149,15 @@ export default function AboutPage() {
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             {scoreCategories.map((category) => (
-              <div key={category} className="border border-white/10 bg-white/[0.035] p-4">
-                <h3 className="text-sm font-semibold text-platinum">{category}</h3>
+              <div
+                key={category.title}
+                className="border border-white/10 bg-white/[0.035] p-4"
+              >
+                <h3 className="text-sm font-semibold text-platinum">
+                  {category.title}
+                </h3>
                 <p className="mt-2 text-xs leading-5 text-pewter">
-                  Scored from the listed data and interpreted for real-world
-                  ownership relevance.
+                  {category.body}
                 </p>
               </div>
             ))}
