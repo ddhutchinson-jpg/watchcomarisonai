@@ -167,12 +167,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   return {
     title: `${name}${reference}`,
-    description: `Review ${name}${reference} with collector-grade specs, AI wearability notes, and buying-context details from WatchComparisonAI.`,
+    description: `Review ${name}${reference} with collector-grade specs, AI wearability notes, and buying-context details from Watch Compare AI.`,
     alternates: {
       canonical: `/watches/${watchSlug(watch)}`,
     },
     openGraph: {
-      title: `${name}${reference} | WatchComparisonAI`,
+      title: `${name}${reference} | Watch Compare AI`,
       description: `Collector-grade specs and AI wearability notes for ${name}${reference}.`,
       url: `/watches/${watchSlug(watch)}`,
     },
@@ -200,7 +200,7 @@ export default async function WatchDetailPage({ params }: PageProps) {
               href="/"
               className="text-xs font-semibold uppercase tracking-[0.32em] text-champagne"
             >
-              WatchComparisonAI
+              Watch Compare AI
             </Link>
             <div className="flex items-center gap-3">
               <Link
@@ -265,7 +265,7 @@ export default async function WatchDetailPage({ params }: PageProps) {
             </div>
             <p className="mt-6 border-t border-white/10 pt-4 text-xs leading-5 text-pewter">
               Generated from the watch data currently available in
-              WatchComparisonAI and intended as a quick review, not a substitute
+              Watch Compare AI and intended as a quick review, not a substitute
               for manually verified specs.
             </p>
           </article>

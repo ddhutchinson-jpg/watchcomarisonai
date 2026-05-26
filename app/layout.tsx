@@ -7,12 +7,12 @@ const siteUrl =
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "WatchComparisonAI",
-    template: "%s | WatchComparisonAI",
+    default: "Watch Compare AI",
+    template: "%s | Watch Compare AI",
   },
   description:
     "Compare luxury watches side by side with collector-grade specs, wearability notes, and AI-assisted comparison tools.",
-  applicationName: "WatchComparisonAI",
+  applicationName: "Watch Compare AI",
   keywords: [
     "luxury watch comparison",
     "watch specs",
@@ -21,20 +21,20 @@ export const metadata: Metadata = {
     "compare watches",
     "collector watches",
   ],
-  authors: [{ name: "WatchComparisonAI" }],
-  creator: "WatchComparisonAI",
-  publisher: "WatchComparisonAI",
+  authors: [{ name: "Watch Compare AI" }],
+  creator: "Watch Compare AI",
+  publisher: "Watch Compare AI",
   openGraph: {
     type: "website",
-    siteName: "WatchComparisonAI",
-    title: "WatchComparisonAI",
+    siteName: "Watch Compare AI",
+    title: "Watch Compare AI",
     description:
       "Compare luxury watches side by side with collector-grade specs and AI-assisted insights.",
     url: "/",
   },
   twitter: {
     card: "summary_large_image",
-    title: "WatchComparisonAI",
+    title: "Watch Compare AI",
     description:
       "Compare luxury watches side by side with collector-grade specs and AI-assisted insights.",
   },

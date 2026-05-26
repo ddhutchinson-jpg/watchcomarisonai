@@ -4,14 +4,14 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "About",
   description:
-    "Learn how WatchComparisonAI compares luxury watches, scores AI-assisted verdicts, uses verified watch data, and supports the site through affiliate links.",
+    "Learn how Watch Compare AI compares luxury watches, scores AI-assisted verdicts, uses verified watch data, and supports the site through affiliate links.",
   alternates: {
     canonical: "/about",
   },
   openGraph: {
-    title: "About WatchComparisonAI",
+    title: "About Watch Compare AI",
     description:
-      "How WatchComparisonAI uses canonical specs, wearability notes, AI-assisted scoring, and affiliate links to help enthusiasts compare watches.",
+      "How Watch Compare AI uses canonical specs, wearability notes, AI-assisted scoring, and affiliate links to help enthusiasts compare watches.",
     url: "/about",
   },
 };
@@ -20,7 +20,7 @@ const methodSteps = [
   {
     label: "Source",
     title: "Start with structured watch data",
-    body: "The comparison engine uses the canonical specs stored in WatchComparisonAI: dimensions, movement details, materials, bracelet and clasp data, MSRP, feature flags, and existing wearability notes. Manufacturer pages are preferred when specs are sourced, with trusted retailers and dealers used when official pages do not provide enough detail.",
+    body: "The comparison engine uses the canonical specs stored in Watch Compare AI: dimensions, movement details, materials, bracelet and clasp data, MSRP, feature flags, and existing wearability notes. Manufacturer pages are preferred when specs are sourced, with trusted retailers and dealers used when official pages do not provide enough detail.",
   },
   {
     label: "Score",
@@ -79,7 +79,7 @@ export default function AboutPage() {
               href="/"
               className="text-xs font-semibold uppercase tracking-[0.32em] text-champagne"
             >
-              WatchComparisonAI
+              Watch Compare AI
             </Link>
             <div className="flex items-center gap-3">
               <Link
@@ -107,7 +107,7 @@ export default function AboutPage() {
               </h1>
             </div>
             <p className="max-w-2xl text-base leading-7 text-pewter sm:text-lg">
-              WatchComparisonAI is designed for enthusiasts who want more than a
+              Watch Compare AI is designed for enthusiasts who want more than a
               manufacturer spec sheet. The goal is to combine verified specs,
               practical wearability context, and AI-assisted interpretation into
               a decision tool that makes tradeoffs easier to see.
@@ -174,7 +174,7 @@ export default function AboutPage() {
             </h2>
             <p className="mt-5 text-sm leading-7 text-pewter">
               The AI is instructed to use only the watch data already saved in
-              WatchComparisonAI. If a specification is missing, the comparison
+              Watch Compare AI. If a specification is missing, the comparison
               should say it is not listed instead of guessing. Scores and
               verdicts are meant to guide shortlisting, not serve as final
               authentication, valuation, or service advice.
@@ -189,7 +189,7 @@ export default function AboutPage() {
               The site can earn from purchase links.
             </h2>
             <p className="mt-5 text-sm leading-7 text-pewter">
-              WatchComparisonAI is expected to support itself through affiliate
+              Watch Compare AI is expected to support itself through affiliate
               links when retailer listings are available. Those links may earn a
               commission if a visitor buys through them, at no additional cost
               to the buyer. Affiliate availability should not determine the AI

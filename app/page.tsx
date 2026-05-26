@@ -13,7 +13,7 @@ export default function Home() {
         <div className="relative z-10 flex w-full flex-col justify-between gap-10">
           <nav className="flex flex-wrap items-center justify-between gap-4">
             <p className="text-xs font-semibold uppercase tracking-[0.32em] text-champagne">
-              WatchComparisonAI
+              Watch Compare AI
             </p>
             <div className="flex items-center gap-3">
               <Link

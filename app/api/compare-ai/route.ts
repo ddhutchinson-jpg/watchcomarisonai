@@ -156,7 +156,7 @@ function comparisonPrompt(watches: WatchComparisonRow[]) {
   return `Compare these two watches for a watch enthusiast who wants help deciding which one better fits their preferences.
 
 Rules:
-- Use the canonical WatchComparisonAI specs and pre-existing wearability notes below as your source data.
+- Use the canonical Watch Compare AI specs and pre-existing wearability notes below as your source data.
 - Do not invent missing specs, market prices, service costs, resale behavior, accuracy claims, or brand facts not present in the data.
 - If a field is missing, say it is not yet listed instead of guessing.
 - Explain how listed specifications translate into real-world wearability, ownership experience, and enthusiast appeal.
@@ -225,7 +225,7 @@ async function generateComparison(watches: WatchComparisonRow[]) {
     body: JSON.stringify({
       model,
       instructions:
-        "You are WatchComparisonAI, a precise luxury watch comparison assistant. Return only valid JSON that matches the requested schema.",
+        "You are Watch Compare AI, a precise luxury watch comparison assistant. Return only valid JSON that matches the requested schema.",
       input: comparisonPrompt(watches),
       text: {
         format: {

@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     canonical: "/compare",
   },
   openGraph: {
-    title: "Compare Luxury Watches | WatchComparisonAI",
+    title: "Compare Luxury Watches | Watch Compare AI",
     description:
       "Choose two watches and compare collector-grade specs, proportions, movement details, and AI-assisted review notes side by side.",
     url: "/compare",
@@ -23,13 +23,13 @@ export const metadata: Metadata = {
         url: "/stats-watch-dial.png",
         width: 1024,
         height: 1024,
-        alt: "WatchComparisonAI luxury watch dial stats graphic",
+        alt: "Watch Compare AI luxury watch dial stats graphic",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Compare Luxury Watches | WatchComparisonAI",
+    title: "Compare Luxury Watches | Watch Compare AI",
     description:
       "Compare collector-grade specs, proportions, movement details, and AI-assisted watch insights side by side.",
     images: ["/stats-watch-dial.png"],
@@ -193,7 +193,7 @@ export default async function ComparePage() {
                 href="/"
                 className="text-xs font-semibold uppercase tracking-[0.35em] text-champagne"
               >
-                WatchComparisonAI
+                Watch Compare AI
               </Link>
               <Link
                 href="/about"

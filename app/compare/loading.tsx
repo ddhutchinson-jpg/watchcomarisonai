@@ -4,7 +4,7 @@ export default function CompareLoading() {
       <div className="mx-auto max-w-7xl">
         <header className="border-b border-white/10 pb-8">
           <p className="text-xs font-semibold uppercase tracking-[0.35em] text-champagne">
-            WatchComparisonAI
+            Watch Compare AI
           </p>
           <div className="mt-5 max-w-4xl">
             <h1 className="font-serif text-5xl leading-tight text-platinum sm:text-6xl lg:text-7xl">
