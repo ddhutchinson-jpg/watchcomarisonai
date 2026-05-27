@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState, type RefObject } from "react";
 import {
   normalizeNamePart,
   watchDisplayName,
@@ -93,6 +93,12 @@ type PairComparisonResult = {
   enthusiast_take: string | null;
   recommended_for: string[] | null;
   confidence_score: string | number | null;
+};
+
+export type PopularComparison = {
+  watchAId: string;
+  watchBId: string;
+  count: number;
 };
 
 const fieldSections: Array<{
@@ -287,6 +293,26 @@ function compareText(left?: string | null, right?: string | null) {
 
 function watchName(watch: Watch) {
   return watchDisplayName(watch);
+}
+
+function shortWatchName(watch: Watch) {
+  const brand = watchBrand(watch);
+  const collection = watchCollection(watch);
+  const model = watchModel(watch);
+  const shouldShowCollection =
+    collection &&
+    (!model || !normalizeNamePart(model).startsWith(normalizeNamePart(collection)));
+  const compactModel = model
+    ?.replace(/\bblack lacquered polished\b/gi, "")
+    .replace(/\bblue dial on bracelet\b/gi, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  return [brand, shouldShowCollection ? collection : null, compactModel]
+    .filter(Boolean)
+    .join(" ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function watchSearchText(watch: Watch) {
@@ -636,7 +662,7 @@ function SearchableWatchSelect({
   }, [query, selectedBrand, watches]);
 
   return (
-    <div className="relative">
+    <div className="relative min-w-0">
       <label className="mb-3 block text-xs font-semibold uppercase tracking-[0.28em] text-champagne/80">
         {label}
       </label>
@@ -650,12 +676,19 @@ function SearchableWatchSelect({
           setSelectedBrand(null);
           setOpen((current) => !current);
         }}
-        className="flex min-h-16 w-full items-center justify-between gap-4 border border-white/10 bg-[#12100d] px-4 py-3 text-left text-base font-semibold text-platinum outline-none transition hover:border-champagne/50 hover:bg-[#171410] focus:border-champagne/70 focus:bg-[#171410] focus:ring-2 focus:ring-champagne/20"
+        className="flex min-h-16 w-full min-w-0 items-center justify-between gap-2 overflow-hidden border border-white/10 bg-[#12100d] px-3 py-3 text-left text-sm font-semibold text-platinum outline-none transition hover:border-champagne/50 hover:bg-[#171410] focus:border-champagne/70 focus:bg-[#171410] focus:ring-2 focus:ring-champagne/20 sm:gap-4 sm:px-4 sm:text-base"
       >
-        <span className="min-w-0 truncate">
-          {selectedWatch ? watchName(selectedWatch) : "Select brand, then watch"}
+        <span className="block min-w-0 flex-1 truncate">
+          {selectedWatch ? (
+            <>
+              <span className="sm:hidden">{shortWatchName(selectedWatch)}</span>
+              <span className="hidden sm:inline">{watchName(selectedWatch)}</span>
+            </>
+          ) : (
+            "Select brand, then watch"
+          )}
         </span>
-        <span className="shrink-0 border-l border-white/10 pl-4 text-xs uppercase tracking-[0.18em] text-champagne" aria-hidden="true">
+        <span className="shrink-0 border-l border-white/10 pl-3 text-[0.68rem] uppercase tracking-[0.14em] text-champagne sm:pl-4 sm:text-xs sm:tracking-[0.18em]" aria-hidden="true">
           {open ? "Close" : "Select"}
         </span>
       </button>
@@ -826,6 +859,61 @@ function WatchCard({
   );
 }
 
+function SpecSection({
+  section,
+  watchA,
+  watchB,
+}: {
+  section: (typeof fieldSections)[number];
+  watchA: Watch | null;
+  watchB: Watch | null;
+}) {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <section className="border-b border-white/10 last:border-b-0">
+      <button
+        type="button"
+        onClick={() => setExpanded((current) => !current)}
+        className="flex w-full items-center justify-between gap-4 bg-[#0d0c0a] px-3 py-3 text-left sm:px-5 md:pointer-events-none"
+      >
+        <h3 className="text-xs font-bold uppercase tracking-[0.24em] text-champagne">
+          {section.title}
+        </h3>
+        <span className="text-xs font-bold uppercase tracking-[0.16em] text-pewter md:hidden">
+          {expanded ? "Hide" : "Show"}
+        </span>
+      </button>
+      <div className={`${expanded ? "block" : "hidden"} md:block`}>
+        <dl className="divide-y divide-white/10">
+          {section.fields.map((field) => (
+            <div
+              key={field.key}
+              className={`grid grid-cols-[6.5rem_1fr_1fr] text-xs transition hover:bg-white/[0.035] sm:grid-cols-[12rem_1fr_1fr] sm:text-sm ${
+                field.emphasis ? "bg-white/[0.018]" : ""
+              }`}
+            >
+              <dt
+                className={`px-3 py-3 text-[0.68rem] font-semibold uppercase tracking-[0.1em] sm:px-5 sm:py-4 sm:text-xs sm:tracking-[0.14em] ${
+                  field.emphasis ? "text-platinum" : "text-pewter"
+                }`}
+              >
+                {field.label}
+              </dt>
+              <dd className="border-l border-white/10 px-3 py-3 font-medium leading-5 text-platinum sm:px-5 sm:py-4 sm:leading-6">
+                {display(fieldValue(watchA, field.key))}
+              </dd>
+              <dd className="border-l border-white/10 px-3 py-3 font-medium leading-5 text-platinum sm:px-5 sm:py-4 sm:leading-6">
+                {display(fieldValue(watchB, field.key))}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+    </section>
+  );
+}
+
 function ComparisonTable({
   watchA,
   watchB,
@@ -835,41 +923,14 @@ function ComparisonTable({
 }) {
   return (
     <section className="mt-6 overflow-hidden border border-white/10 bg-white/[0.045] shadow-aureate">
-      <div>
-        {fieldSections.map((section) => (
-          <section key={section.title} className="border-b border-white/10 last:border-b-0">
-            <div className="bg-[#0d0c0a] px-3 py-3 sm:px-5">
-              <h3 className="text-xs font-bold uppercase tracking-[0.24em] text-champagne">
-                {section.title}
-              </h3>
-            </div>
-            <dl className="divide-y divide-white/10">
-              {section.fields.map((field) => (
-                <div
-                  key={field.key}
-                  className={`grid grid-cols-[7.5rem_1fr_1fr] text-sm transition hover:bg-white/[0.035] sm:grid-cols-[12rem_1fr_1fr] ${
-                    field.emphasis ? "bg-white/[0.018]" : ""
-                  }`}
-                >
-                  <dt
-                    className={`px-3 py-4 text-xs font-semibold uppercase tracking-[0.14em] sm:px-5 ${
-                      field.emphasis ? "text-platinum" : "text-pewter"
-                    }`}
-                  >
-                    {field.label}
-                  </dt>
-                  <dd className="border-l border-white/10 px-3 py-4 font-medium leading-6 text-platinum sm:px-5">
-                    {display(fieldValue(watchA, field.key))}
-                  </dd>
-                  <dd className="border-l border-white/10 px-3 py-4 font-medium leading-6 text-platinum sm:px-5">
-                    {display(fieldValue(watchB, field.key))}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          </section>
-        ))}
-      </div>
+      {fieldSections.map((section) => (
+        <SpecSection
+          key={section.title}
+          section={section}
+          watchA={watchA}
+          watchB={watchB}
+        />
+      ))}
     </section>
   );
 }
@@ -1398,9 +1459,11 @@ function DecisionSummary({
 function PairComparisonPanel({
   watchA,
   watchB,
+  panelRef,
 }: {
   watchA: Watch | null;
   watchB: Watch | null;
+  panelRef?: RefObject<HTMLElement | null>;
 }) {
   const [comparison, setComparison] = useState<PairComparisonResult | null>(null);
   const [loading, setLoading] = useState(false);
@@ -1450,7 +1513,10 @@ function PairComparisonPanel({
   }
 
   return (
-    <section className="border border-champagne/20 bg-black/25 p-5 shadow-aureate sm:p-6">
+    <section
+      ref={panelRef}
+      className="scroll-mt-4 border border-champagne/20 bg-black/25 p-5 shadow-aureate sm:p-6"
+    >
       <div className="grid gap-5 lg:grid-cols-[1fr_auto] lg:items-center">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.28em] text-champagne">
@@ -1470,7 +1536,7 @@ function PairComparisonPanel({
           type="button"
           disabled={!canCompare || loading}
           onClick={compareWithAI}
-          className="h-12 border border-champagne bg-champagne px-5 text-sm font-bold uppercase tracking-[0.18em] text-obsidian transition hover:bg-platinum disabled:cursor-not-allowed disabled:border-white/15 disabled:bg-white/10 disabled:text-pewter"
+          className="hidden h-12 border border-champagne bg-champagne px-5 text-sm font-bold uppercase tracking-[0.18em] text-obsidian transition hover:bg-platinum disabled:cursor-not-allowed disabled:border-white/15 disabled:bg-white/10 disabled:text-pewter sm:block"
         >
           {loading ? "Building Review..." : "Compare With AI"}
         </button>
@@ -1515,6 +1581,18 @@ function PairComparisonPanel({
               watchB={watchB}
             />
           ) : null}
+        </div>
+      ) : null}
+      {canCompare ? (
+        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-champagne/30 bg-[#080706]/95 p-3 shadow-[0_-18px_42px_rgba(0,0,0,0.42)] backdrop-blur sm:hidden">
+          <button
+            type="button"
+            disabled={loading}
+            onClick={compareWithAI}
+            className="h-12 w-full border border-champagne bg-champagne px-4 text-sm font-bold uppercase tracking-[0.16em] text-obsidian transition hover:bg-platinum disabled:cursor-not-allowed disabled:border-white/15 disabled:bg-white/10 disabled:text-pewter"
+          >
+            {loading ? "Building Review..." : "Compare With AI"}
+          </button>
         </div>
       ) : null}
     </section>
@@ -1590,15 +1668,89 @@ function PurchaseOptionsPanel({
   );
 }
 
+function PopularComparisons({
+  comparisons,
+  watches,
+  onSelectPair,
+}: {
+  comparisons: PopularComparison[];
+  watches: Watch[];
+  onSelectPair: (comparison: PopularComparison) => void;
+}) {
+  if (comparisons.length === 0) {
+    return null;
+  }
+
+  const watchById = new Map(
+    watches
+      .map((watch) => {
+        const id = watchId(watch);
+        return id ? ([id, watch] as const) : null;
+      })
+      .filter((entry): entry is readonly [string, Watch] => Boolean(entry)),
+  );
+
+  return (
+    <section className="mt-5 border-t border-white/10 pt-5">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-champagne/80">
+            Need a second watch?
+          </p>
+          <p className="mt-2 text-sm text-pewter">
+            Load a popular pairing, then run the AI comparison when you are
+            ready.
+          </p>
+        </div>
+      </div>
+      <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        {comparisons.map((comparison) => {
+          const watchA = watchById.get(comparison.watchAId);
+          const watchB = watchById.get(comparison.watchBId);
+
+          if (!watchA || !watchB) {
+            return null;
+          }
+
+          return (
+            <button
+              key={`${comparison.watchAId}:${comparison.watchBId}`}
+              type="button"
+              onClick={() => onSelectPair(comparison)}
+              className="group min-h-28 border border-white/10 bg-white/[0.035] p-3 text-left transition hover:border-champagne/45 hover:bg-white/[0.06] focus:border-champagne/60 focus:outline-none focus:ring-2 focus:ring-champagne/20 sm:min-h-36 sm:p-4"
+            >
+              <p className="text-sm font-semibold leading-5 text-platinum">
+                {watchName(watchA)}
+              </p>
+              <p className="mt-2 text-[0.68rem] font-bold uppercase tracking-[0.18em] text-pewter">
+                vs
+              </p>
+              <p className="mt-2 text-sm font-semibold leading-5 text-platinum">
+                {watchName(watchB)}
+              </p>
+              <span className="mt-4 inline-block text-xs font-bold uppercase tracking-[0.16em] text-champagne opacity-80 transition group-hover:opacity-100">
+                Load pair
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 export function CompareClient({
   watches,
   defaultWatchAId,
   defaultWatchBId,
+  popularComparisons = [],
 }: {
   watches: Watch[];
   defaultWatchAId?: string | null;
   defaultWatchBId?: string | null;
+  popularComparisons?: PopularComparison[];
 }) {
+  const aiPanelRef = useRef<HTMLElement | null>(null);
   const watchesWithMeasurements = watches.filter(hasFitMeasurements);
   const popularWatchA = defaultWatchAId
     ? watches.find((watch) => watchId(watch) === defaultWatchAId)
@@ -1607,11 +1759,7 @@ export function CompareClient({
     ? watches.find((watch) => watchId(watch) === defaultWatchBId)
     : null;
   const defaultWatchA = popularWatchA ?? watchesWithMeasurements[0] ?? watches[0];
-  const defaultWatchB =
-    popularWatchB ??
-    watchesWithMeasurements.find((watch) => watchId(watch) !== watchId(defaultWatchA)) ??
-    watchesWithMeasurements[1] ??
-    watches[1];
+  const defaultWatchB = popularWatchB;
   const [watchAKey, setWatchAKey] = useState<string | null>(
     defaultWatchA ? watchKey(defaultWatchA) : null,
   );
@@ -1630,6 +1778,25 @@ export function CompareClient({
       null,
     [watchBKey, watches],
   );
+
+  function selectPopularComparison(comparison: PopularComparison) {
+    const nextWatchA = watches.find(
+      (watch) => watchId(watch) === comparison.watchAId,
+    );
+    const nextWatchB = watches.find(
+      (watch) => watchId(watch) === comparison.watchBId,
+    );
+
+    setWatchAKey(nextWatchA ? watchKey(nextWatchA) : null);
+    setWatchBKey(nextWatchB ? watchKey(nextWatchB) : null);
+
+    window.requestAnimationFrame(() => {
+      aiPanelRef.current?.scrollIntoView({
+        block: "start",
+        behavior: "smooth",
+      });
+    });
+  }
 
   if (watches.length === 0) {
     return (
@@ -1654,19 +1821,24 @@ export function CompareClient({
           </div>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
-        <SearchableWatchSelect
-          label="Watch A"
-          watches={watches}
-          selectedKey={watchAKey}
-          onSelect={setWatchAKey}
-        />
-        <SearchableWatchSelect
-          label="Watch B"
-          watches={watches}
-          selectedKey={watchBKey}
-          onSelect={setWatchBKey}
-        />
+          <SearchableWatchSelect
+            label="Watch A"
+            watches={watches}
+            selectedKey={watchAKey}
+            onSelect={setWatchAKey}
+          />
+          <SearchableWatchSelect
+            label="Watch B"
+            watches={watches}
+            selectedKey={watchBKey}
+            onSelect={setWatchBKey}
+          />
         </div>
+        <PopularComparisons
+          comparisons={popularComparisons}
+          watches={watches}
+          onSelectPair={selectPopularComparison}
+        />
       </div>
 
       <div className="mt-5">
@@ -1674,7 +1846,11 @@ export function CompareClient({
       </div>
 
       <div className="mt-6">
-        <PairComparisonPanel watchA={watchA} watchB={watchB} />
+        <PairComparisonPanel
+          watchA={watchA}
+          watchB={watchB}
+          panelRef={aiPanelRef}
+        />
       </div>
 
       <div className="mt-6">

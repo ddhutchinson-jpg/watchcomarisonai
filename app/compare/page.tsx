@@ -1,4 +1,8 @@
-import { CompareClient, type Watch } from "./CompareClient";
+import {
+  CompareClient,
+  type PopularComparison,
+  type Watch,
+} from "./CompareClient";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -40,41 +44,47 @@ export const metadata: Metadata = {
   },
 };
 
+const defaultWatchReference = "L3.779.4.56.6";
+
 type ComparisonEvent = {
   watch_a_id: string;
   watch_b_id: string;
   pair_key: string;
 };
 
-const popularityWindowDays = 90;
-
 function isMissingEventsTableError(errorCode?: string) {
   return ["42P01", "PGRST106", "PGRST205"].includes(errorCode ?? "");
 }
 
-async function loadPopularDefaultPair(availableWatchIds: Set<string>) {
-  const since = new Date(
-    Date.now() - popularityWindowDays * 24 * 60 * 60 * 1000,
-  ).toISOString();
+function watchId(watch: Watch) {
+  const id = watch.watch_id ?? watch.id;
+  return id === null || id === undefined ? null : String(id);
+}
+
+async function loadPopularComparisons(watches: Watch[]) {
+  const availableWatchIds = new Set(
+    watches.map(watchId).filter((id): id is string => Boolean(id)),
+  );
+
+  if (availableWatchIds.size === 0) {
+    return [];
+  }
 
   const { data, error } = await supabaseAdmin
     .from("watch_comparison_events")
     .select("watch_a_id,watch_b_id,pair_key")
-    .gte("created_at", since)
+    .limit(5000)
     .returns<ComparisonEvent[]>();
 
   if (error) {
     if (isMissingEventsTableError(error.code)) {
-      return null;
+      return [];
     }
 
     throw new Error(error.message);
   }
 
-  const pairCounts = new Map<
-    string,
-    { watchAId: string; watchBId: string; count: number }
-  >();
+  const pairCounts = new Map<string, PopularComparison>();
 
   for (const event of data ?? []) {
     if (
@@ -94,16 +104,9 @@ async function loadPopularDefaultPair(availableWatchIds: Set<string>) {
     pairCounts.set(event.pair_key, current);
   }
 
-  const popularPair = [...pairCounts.values()].sort(
-    (left, right) => right.count - left.count,
-  )[0];
-
-  return popularPair
-    ? {
-        watchAId: popularPair.watchAId,
-        watchBId: popularPair.watchBId,
-      }
-    : null;
+  return [...pairCounts.values()]
+    .sort((left, right) => right.count - left.count)
+    .slice(0, 4);
 }
 
 async function loadWatches() {
@@ -115,19 +118,19 @@ async function loadWatches() {
     .order("brand_name", { ascending: true });
 
   const watches = (data ?? []) as Watch[];
-  const availableWatchIds = new Set(
-    watches
-      .map((watch) => watch.watch_id)
-      .filter((id): id is string => typeof id === "string"),
+  const defaultWatchA = watches.find(
+    (watch) => watch.reference_number === defaultWatchReference,
   );
-  const defaultPair =
-    availableWatchIds.size > 0
-      ? await loadPopularDefaultPair(availableWatchIds)
-      : null;
+  const popularComparisons =
+    watches.length > 0 ? await loadPopularComparisons(watches) : [];
 
   return {
     watches,
-    defaultPair,
+    defaultWatchAId:
+      defaultWatchA?.watch_id === null || defaultWatchA?.watch_id === undefined
+        ? null
+        : String(defaultWatchA.watch_id),
+    popularComparisons,
     error: error?.message ?? null,
   };
 }
@@ -176,7 +179,8 @@ function HeaderStatsDial({
 }
 
 export default async function ComparePage() {
-  const { watches, defaultPair, error } = await loadWatches();
+  const { watches, defaultWatchAId, popularComparisons, error } =
+    await loadWatches();
   const brandCount = new Set(
     watches
       .map((watch) => watch.brand_name)
@@ -211,7 +215,7 @@ export default async function ComparePage() {
               wearability.
             </p>
           </div>
-          <div className="flex items-center justify-center border-t border-white/10 bg-black/20 p-4 md:border-l md:border-t-0">
+          <div className="hidden items-center justify-center border-t border-white/10 bg-black/20 p-4 md:flex md:border-l md:border-t-0">
             <HeaderStatsDial
               watchCount={watches.length}
               brandCount={brandCount}
@@ -227,8 +231,9 @@ export default async function ComparePage() {
           ) : (
             <CompareClient
               watches={watches}
-              defaultWatchAId={defaultPair?.watchAId ?? null}
-              defaultWatchBId={defaultPair?.watchBId ?? null}
+              defaultWatchAId={defaultWatchAId}
+              defaultWatchBId={null}
+              popularComparisons={popularComparisons}
             />
           )}
         </section>
