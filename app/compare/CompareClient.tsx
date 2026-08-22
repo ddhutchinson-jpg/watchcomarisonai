@@ -211,14 +211,6 @@ function watchImageUrl(watch: Watch | null | undefined) {
   return watch?.primary_image_url ?? watch?.image_url ?? null;
 }
 
-function watchAffiliateUrl(watch: Watch | null | undefined) {
-  return watch?.affiliate_url ?? null;
-}
-
-function watchAffiliatePartner(watch: Watch | null | undefined) {
-  return watch?.affiliate_partner ?? "Retailer";
-}
-
 function withMm(value: Watch[keyof Watch]) {
   if (value === null || value === undefined || value === "") {
     return null;
@@ -463,19 +455,41 @@ function KeyMeasure({
   );
 }
 
-function WatchIdentity({ watch }: { watch: Watch }) {
+function WatchColumnHeader({
+  watch,
+  label,
+}: {
+  watch: Watch | null;
+  label: string;
+}) {
+  if (!watch) {
+    return (
+      <div className="min-h-28 border-l border-white/10 px-3 py-4 sm:px-5">
+        <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-champagne/80">
+          {label}
+        </p>
+        <p className="mt-3 text-sm text-pewter">Select a watch</p>
+      </div>
+    );
+  }
+
   return (
-    <div>
-      <p className="text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-champagne/80">
+    <div className="min-h-28 border-l border-white/10 px-3 py-4 sm:px-5">
+      <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-champagne/80">
+        {label}
+      </p>
+      <h3 className="mt-2 text-sm font-semibold leading-5 text-platinum sm:text-base">
+        {watchName(watch)}
+      </h3>
+      <p className="mt-1 text-xs font-semibold uppercase tracking-[0.16em] text-pewter">
         {watch.reference_number || "Reference not listed"}
       </p>
-      <h3 className="mt-2 font-serif text-3xl leading-none text-platinum">
-        {watchBrand(watch) || "Unknown Brand"}
-      </h3>
-      <p className="mt-2 text-sm leading-5 text-pewter">
-        {[watchCollection(watch), watchModel(watch)].filter(Boolean).join(" ") ||
-          "Model not listed"}
-      </p>
+      <Link
+        href={`/watches/${watchSlug(watch)}`}
+        className="mt-3 inline-flex w-fit border border-champagne/40 px-3 py-1.5 text-[0.68rem] font-bold uppercase tracking-[0.14em] text-champagne transition hover:bg-champagne hover:text-obsidian focus:bg-champagne focus:text-obsidian focus:outline-none focus:ring-2 focus:ring-champagne/30"
+      >
+        View Details
+      </Link>
     </div>
   );
 }
@@ -783,78 +797,50 @@ function SearchableWatchSelect({
   );
 }
 
-function WatchCard({
+function BenchImagePreview({
   watch,
   label,
 }: {
   watch: Watch | null;
   label: string;
 }) {
-  if (!watch) {
-    return (
-      <section className="flex min-h-[24rem] items-center justify-center border border-white/10 bg-white/[0.04] p-8 text-center">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-champagne/70">
-            {label}
-          </p>
-          <p className="mt-4 text-sm text-pewter">Select a watch to begin.</p>
-        </div>
-      </section>
-    );
-  }
+  const imageUrl = watchImageUrl(watch);
 
   return (
-    <section className="overflow-hidden border border-white/10 bg-white/[0.045] shadow-aureate">
-      <div className="p-5 sm:p-6">
-        <div className="flex items-start justify-between gap-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-champagne/70">
+    <section className="grid min-h-72 overflow-hidden border border-white/10 bg-white/[0.035] shadow-aureate sm:grid-cols-[minmax(0,1fr)_11rem]">
+      <div className="flex flex-col justify-between gap-5 p-4 sm:p-5">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-champagne/80">
             {label}
           </p>
+          <h3 className="mt-3 font-serif text-2xl leading-tight text-platinum">
+            {watch ? watchName(watch) : "Select a watch"}
+          </h3>
+          <p className="mt-2 text-xs font-semibold uppercase tracking-[0.18em] text-pewter">
+            {watch?.reference_number || "Reference not listed"}
+          </p>
+        </div>
+        {watch ? (
           <Link
             href={`/watches/${watchSlug(watch)}`}
-            className="inline-flex w-fit border border-champagne/40 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-champagne transition hover:bg-champagne hover:text-obsidian focus:bg-champagne focus:text-obsidian focus:outline-none focus:ring-2 focus:ring-champagne/30"
+            className="inline-flex w-fit border border-champagne/40 px-3 py-2 text-xs font-bold uppercase tracking-[0.16em] text-champagne transition hover:bg-champagne hover:text-obsidian focus:bg-champagne focus:text-obsidian focus:outline-none focus:ring-2 focus:ring-champagne/30"
           >
             View Details
           </Link>
-        </div>
-        <div className="mt-4">
-          <WatchIdentity watch={watch} />
-        </div>
-        <dl className="mt-6 grid grid-cols-2 gap-px bg-white/10 text-sm lg:grid-cols-4">
-          <div className="bg-[#100f0d] p-3">
-            <dt className="text-[0.68rem] uppercase tracking-[0.16em] text-pewter">
-              MSRP
-            </dt>
-            <dd className="mt-1 text-base font-semibold text-platinum">
-              {display(fieldValue(watch, "msrp"))}
-            </dd>
-          </div>
-          <div className="bg-[#100f0d] p-3">
-            <dt className="text-[0.68rem] uppercase tracking-[0.16em] text-pewter">
-              Size
-            </dt>
-            <dd className="mt-1 text-base font-semibold text-platinum">
-              {display(fieldValue(watch, "case_size"))}
-            </dd>
-          </div>
-          <div className="bg-[#100f0d] p-3">
-            <dt className="text-[0.68rem] uppercase tracking-[0.16em] text-pewter">
-              Movement
-            </dt>
-            <dd className="mt-1 text-base font-semibold text-platinum">
-              {display(fieldValue(watch, "movement_type"))}
-            </dd>
-          </div>
-          <div className="bg-[#100f0d] p-3">
-            <dt className="text-[0.68rem] uppercase tracking-[0.16em] text-pewter">
-              Water
-            </dt>
-            <dd className="mt-1 text-base font-semibold text-platinum">
-              {display(fieldValue(watch, "water_resistance"))}
-            </dd>
-          </div>
-        </dl>
+        ) : null}
       </div>
+      {watch && imageUrl ? (
+        <div
+          aria-label={`${watchName(watch)} product image`}
+          className="min-h-72 border-t border-white/10 bg-white bg-contain bg-center bg-no-repeat sm:min-h-full sm:border-l sm:border-t-0"
+          role="img"
+          style={{ backgroundImage: `url("${imageUrl}")` }}
+        />
+      ) : (
+        <div className="grid min-h-72 place-items-center border-t border-white/10 bg-black/20 px-4 text-center text-sm text-pewter sm:min-h-full sm:border-l sm:border-t-0">
+          Image not listed
+        </div>
+      )}
     </section>
   );
 }
@@ -923,6 +909,15 @@ function ComparisonTable({
 }) {
   return (
     <section className="mt-6 overflow-hidden border border-white/10 bg-white/[0.045] shadow-aureate">
+      <div className="grid grid-cols-[6.5rem_1fr_1fr] border-b border-white/10 bg-black/20 sm:grid-cols-[12rem_1fr_1fr]">
+        <div className="px-3 py-4 sm:px-5">
+          <p className="text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-pewter">
+            Compared
+          </p>
+        </div>
+        <WatchColumnHeader watch={watchA} label="Watch A" />
+        <WatchColumnHeader watch={watchB} label="Watch B" />
+      </div>
       {fieldSections.map((section) => (
         <SpecSection
           key={section.title}
@@ -1599,75 +1594,6 @@ function PairComparisonPanel({
   );
 }
 
-function PurchaseCard({ watch, label }: { watch: Watch | null; label: string }) {
-  const affiliateUrl = watchAffiliateUrl(watch);
-  const imageUrl = watchImageUrl(watch);
-
-  if (!watch || !affiliateUrl || !imageUrl) {
-    return null;
-  }
-
-  const partner = watchAffiliatePartner(watch);
-
-  return (
-    <a
-      href={affiliateUrl}
-      target="_blank"
-      rel="noreferrer sponsored"
-      className="group grid overflow-hidden border border-white/10 bg-white/[0.04] shadow-aureate transition hover:border-champagne/40 hover:bg-white/[0.06] sm:grid-cols-[11rem_1fr]"
-    >
-      <div
-        aria-hidden="true"
-        className="min-h-52 bg-white bg-contain bg-center bg-no-repeat sm:min-h-full"
-        style={{ backgroundImage: `url("${imageUrl}")` }}
-      />
-      <div className="flex flex-col justify-between gap-5 p-5">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-[0.24em] text-champagne/80">
-            {label} Purchase Option
-          </p>
-          <h3 className="mt-3 font-serif text-2xl leading-tight text-platinum">
-            {watchName(watch)}
-          </h3>
-          <p className="mt-2 text-xs font-semibold uppercase tracking-[0.18em] text-pewter">
-            {watch.reference_number || "Reference not listed"}
-          </p>
-          <p className="mt-4 text-sm leading-6 text-pewter">
-            Available from {partner}. Open the retailer listing to view current
-            availability, pricing, and purchase details.
-          </p>
-        </div>
-        <span className="inline-flex w-fit border border-champagne/40 px-3 py-2 text-xs font-bold uppercase tracking-[0.16em] text-champagne transition group-hover:bg-champagne group-hover:text-obsidian">
-          View Listing
-        </span>
-      </div>
-    </a>
-  );
-}
-
-function PurchaseOptionsPanel({
-  watchA,
-  watchB,
-}: {
-  watchA: Watch | null;
-  watchB: Watch | null;
-}) {
-  const hasPurchaseOption =
-    Boolean(watchAffiliateUrl(watchA) && watchImageUrl(watchA)) ||
-    Boolean(watchAffiliateUrl(watchB) && watchImageUrl(watchB));
-
-  if (!hasPurchaseOption) {
-    return null;
-  }
-
-  return (
-    <section className="grid gap-4 lg:grid-cols-2">
-      <PurchaseCard watch={watchA} label="Watch A" />
-      <PurchaseCard watch={watchB} label="Watch B" />
-    </section>
-  );
-}
-
 function PopularComparisons({
   comparisons,
   watches,
@@ -1834,6 +1760,10 @@ export function CompareClient({
             onSelect={setWatchBKey}
           />
         </div>
+        <div className="mt-4 grid gap-4 lg:grid-cols-2">
+          <BenchImagePreview watch={watchA} label="Watch A" />
+          <BenchImagePreview watch={watchB} label="Watch B" />
+        </div>
         <PopularComparisons
           comparisons={popularComparisons}
           watches={watches}
@@ -1851,15 +1781,6 @@ export function CompareClient({
           watchB={watchB}
           panelRef={aiPanelRef}
         />
-      </div>
-
-      <div className="mt-6">
-        <PurchaseOptionsPanel watchA={watchA} watchB={watchB} />
-      </div>
-
-      <div className="mt-6 grid gap-5 lg:grid-cols-2">
-        <WatchCard label="Watch A" watch={watchA} />
-        <WatchCard label="Watch B" watch={watchB} />
       </div>
 
       <ComparisonTable watchA={watchA} watchB={watchB} />
