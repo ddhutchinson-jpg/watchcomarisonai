@@ -9,12 +9,12 @@ const siteUrl =
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Watch Compare AI",
-    template: "%s | Watch Compare AI",
+    default: "DeezWatchez",
+    template: "%s | DeezWatchez",
   },
   description:
-    "Compare luxury watches side by side with collector-grade specs, wearability notes, and AI-assisted comparison tools.",
-  applicationName: "Watch Compare AI",
+    "Search luxury watches, review collector-grade specs, and open side-by-side comparisons for popular references.",
+  applicationName: "DeezWatchez",
   keywords: [
     "luxury watch comparison",
     "watch specs",
@@ -23,22 +23,22 @@ export const metadata: Metadata = {
     "compare watches",
     "collector watches",
   ],
-  authors: [{ name: "Watch Compare AI" }],
-  creator: "Watch Compare AI",
-  publisher: "Watch Compare AI",
+  authors: [{ name: "DeezWatchez" }],
+  creator: "DeezWatchez",
+  publisher: "DeezWatchez",
   openGraph: {
     type: "website",
-    siteName: "Watch Compare AI",
-    title: "Watch Compare AI",
+    siteName: "DeezWatchez",
+    title: "DeezWatchez",
     description:
-      "Compare luxury watches side by side with collector-grade specs and AI-assisted insights.",
+      "Search luxury watches and compare specs, fit, movement details, reviews, and research context.",
     url: "/",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Watch Compare AI",
+    title: "DeezWatchez",
     description:
-      "Compare luxury watches side by side with collector-grade specs and AI-assisted insights.",
+      "Search luxury watches and compare specs, fit, movement details, reviews, and research context.",
   },
   robots: {
     index: true,

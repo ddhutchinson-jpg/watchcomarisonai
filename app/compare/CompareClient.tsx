@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useRef, useState, type RefObject } from "react";
+import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import {
   normalizeNamePart,
   watchDisplayName,
@@ -13,8 +13,6 @@ export type Watch = {
   watch_id?: string | number | null;
   image_url?: string | null;
   primary_image_url?: string | null;
-  affiliate_url?: string | null;
-  affiliate_partner?: string | null;
   brand?: string | null;
   brand_name?: string | null;
   collection?: string | null;
@@ -106,7 +104,7 @@ const fieldSections: Array<{
   fields: Array<{ label: string; key: keyof Watch; emphasis?: boolean }>;
 }> = [
   {
-    title: "Buying Context",
+    title: "Reference Details",
     fields: [
       { label: "MSRP", key: "msrp", emphasis: true },
       { label: "Brand", key: "brand" },
@@ -311,6 +309,10 @@ function watchSearchText(watch: Watch) {
   return [watchName(watch), watch.reference_number].filter(Boolean).join(" ");
 }
 
+function pairPath(watchA: Watch, watchB: Watch) {
+  return `/compare/${watchSlug(watchA)}/vs/${watchSlug(watchB)}`;
+}
+
 function display(value: Watch[keyof Watch]) {
   if (value === null || value === undefined || value === "") {
     return "Not listed";
@@ -444,11 +446,11 @@ function KeyMeasure({
   value: Watch[keyof Watch];
 }) {
   return (
-    <div className="border-l border-champagne/35 pl-4">
-      <dt className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-pewter">
+    <div className="border-l border-red-600/35 pl-4">
+      <dt className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-zinc-600">
         {label}
       </dt>
-      <dd className="mt-1 text-lg font-semibold text-platinum">
+      <dd className="mt-1 text-lg font-semibold text-black">
         {display(value)}
       </dd>
     </div>
@@ -464,29 +466,28 @@ function WatchColumnHeader({
 }) {
   if (!watch) {
     return (
-      <div className="min-h-28 border-l border-white/10 px-3 py-4 sm:px-5">
-        <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-champagne/80">
+      <div className="min-h-28 border-l border-zinc-200 px-3 py-4 sm:px-5">
+        <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-red-600/80">
           {label}
         </p>
-        <p className="mt-3 text-sm text-pewter">Select a watch</p>
+        <p className="mt-3 text-sm text-zinc-600">Select a watch</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-28 border-l border-white/10 px-3 py-4 sm:px-5">
-      <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-champagne/80">
-        {label}
-      </p>
-      <h3 className="mt-2 text-sm font-semibold leading-5 text-platinum sm:text-base">
-        {watchName(watch)}
-      </h3>
-      <p className="mt-1 text-xs font-semibold uppercase tracking-[0.16em] text-pewter">
-        {watch.reference_number || "Reference not listed"}
-      </p>
+    <div className="flex min-h-28 flex-col border-l border-zinc-200 px-3 py-4 sm:px-5">
+      <div>
+        <h3 className="text-sm font-semibold leading-5 text-black sm:text-base">
+          {watchName(watch)}
+        </h3>
+        <p className="mt-1 text-xs font-semibold uppercase tracking-[0.16em] text-zinc-600">
+          {watch.reference_number || "Reference not listed"}
+        </p>
+      </div>
       <Link
         href={`/watches/${watchSlug(watch)}`}
-        className="mt-3 inline-flex w-fit border border-champagne/40 px-3 py-1.5 text-[0.68rem] font-bold uppercase tracking-[0.14em] text-champagne transition hover:bg-champagne hover:text-obsidian focus:bg-champagne focus:text-obsidian focus:outline-none focus:ring-2 focus:ring-champagne/30"
+        className="mt-auto inline-flex w-fit border border-red-600/40 px-3 py-1.5 text-[0.68rem] font-bold uppercase tracking-[0.14em] text-red-600 transition hover:bg-red-600 hover:text-white focus:bg-red-600 focus:text-white focus:outline-none focus:ring-2 focus:ring-red-600/30"
       >
         View Details
       </Link>
@@ -511,35 +512,35 @@ function DimensionCompareStrip({
   const widthB = parsedB ? Math.max(12, Math.min(100, (parsedB / max) * 100)) : 0;
 
   return (
-    <div className="border-t border-white/10 py-4 first:border-t-0">
+    <div className="border-t border-zinc-200 py-4 first:border-t-0">
       <div className="mb-3 flex items-center justify-between gap-4">
-        <h3 className="text-sm font-semibold text-platinum">{label}</h3>
-        <p className="text-xs uppercase tracking-[0.16em] text-champagne/80">
+        <h3 className="text-sm font-semibold text-black">{label}</h3>
+        <p className="text-xs uppercase tracking-[0.16em] text-red-600/80">
           {formatDelta(parsedA, parsedB)}
         </p>
       </div>
       <div className="grid gap-3">
         <div className="grid grid-cols-[4.5rem_1fr_5rem] items-center gap-3 text-sm">
-          <span className="text-pewter">Watch A</span>
-          <span className="h-2 overflow-hidden rounded-full bg-white/[0.06]">
+          <span className="text-zinc-600">Watch A</span>
+          <span className="h-2 overflow-hidden rounded-full bg-zinc-200">
             <span
-              className="block h-full rounded-full bg-champagne"
+              className="block h-full rounded-full bg-red-600"
               style={{ width: `${widthA}%` }}
             />
           </span>
-          <span className="text-right font-medium text-platinum">
+          <span className="text-right font-medium text-black">
             {formatMm(parsedA)}
           </span>
         </div>
         <div className="grid grid-cols-[4.5rem_1fr_5rem] items-center gap-3 text-sm">
-          <span className="text-pewter">Watch B</span>
-          <span className="h-2 overflow-hidden rounded-full bg-white/[0.06]">
+          <span className="text-zinc-600">Watch B</span>
+          <span className="h-2 overflow-hidden rounded-full bg-zinc-200">
             <span
               className="block h-full rounded-full bg-cognac"
               style={{ width: `${widthB}%` }}
             />
           </span>
-          <span className="text-right font-medium text-platinum">
+          <span className="text-right font-medium text-black">
             {formatMm(parsedB)}
           </span>
         </div>
@@ -560,15 +561,15 @@ function CollectorRead({
   }
 
   return (
-    <section className="grid gap-6 border border-white/10 bg-white/[0.035] p-5 shadow-aureate sm:p-6 lg:grid-cols-[1fr_1.15fr]">
+    <section className="grid gap-6 border border-zinc-200 bg-white p-5 shadow-aureate sm:p-6 lg:grid-cols-[1fr_1.15fr]">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.28em] text-champagne/80">
+        <p className="text-xs font-semibold uppercase tracking-[0.28em] text-red-600/80">
           Collector read
         </p>
-        <h2 className="mt-3 font-serif text-3xl leading-tight text-platinum sm:text-5xl">
+        <h2 className="mt-3 font-serif text-3xl leading-tight text-black sm:text-5xl">
           The proportions tell the first story.
         </h2>
-        <p className="mt-4 text-sm leading-6 text-pewter">
+        <p className="mt-4 text-sm leading-6 text-zinc-600">
           This view is built for the details enthusiasts usually have to hunt
           across reviews: wrist presence, case height, bracelet taper, clasp
           behavior, and practical adjustability.
@@ -578,7 +579,7 @@ function CollectorRead({
           <KeyMeasure label="Watch B" value={fieldValue(watchB, "case_size")} />
         </div>
       </div>
-      <div className="border-y border-white/10 bg-black/10 px-1">
+      <div className="border-y border-zinc-200 bg-zinc-50 px-1">
         <DimensionCompareStrip
           label="Case diameter"
           valueA={fieldValue(watchA, "case_size")}
@@ -677,7 +678,7 @@ function SearchableWatchSelect({
 
   return (
     <div className="relative min-w-0">
-      <label className="mb-3 block text-xs font-semibold uppercase tracking-[0.28em] text-champagne/80">
+      <label className="mb-3 block text-xs font-semibold uppercase tracking-[0.28em] text-red-600/80">
         {label}
       </label>
       <button
@@ -690,7 +691,7 @@ function SearchableWatchSelect({
           setSelectedBrand(null);
           setOpen((current) => !current);
         }}
-        className="flex min-h-16 w-full min-w-0 items-center justify-between gap-2 overflow-hidden border border-white/10 bg-[#12100d] px-3 py-3 text-left text-sm font-semibold text-platinum outline-none transition hover:border-champagne/50 hover:bg-[#171410] focus:border-champagne/70 focus:bg-[#171410] focus:ring-2 focus:ring-champagne/20 sm:gap-4 sm:px-4 sm:text-base"
+        className="flex min-h-16 w-full min-w-0 items-center justify-between gap-2 overflow-hidden border border-zinc-200 bg-white px-3 py-3 text-left text-sm font-semibold text-black outline-none transition hover:border-red-600/50 hover:bg-zinc-50 focus:border-red-600/70 focus:bg-zinc-50 focus:ring-2 focus:ring-red-600/20 sm:gap-4 sm:px-4 sm:text-base"
       >
         <span className="block min-w-0 flex-1 truncate">
           {selectedWatch ? (
@@ -702,7 +703,7 @@ function SearchableWatchSelect({
             "Select brand, then watch"
           )}
         </span>
-        <span className="shrink-0 border-l border-white/10 pl-3 text-[0.68rem] uppercase tracking-[0.14em] text-champagne sm:pl-4 sm:text-xs sm:tracking-[0.18em]" aria-hidden="true">
+        <span className="shrink-0 border-l border-zinc-200 pl-3 text-[0.68rem] uppercase tracking-[0.14em] text-red-600 sm:pl-4 sm:text-xs sm:tracking-[0.18em]" aria-hidden="true">
           {open ? "Close" : "Select"}
         </span>
       </button>
@@ -710,7 +711,7 @@ function SearchableWatchSelect({
         <div
           id={listboxId}
           role="listbox"
-          className="absolute z-20 mt-2 max-h-80 w-full overflow-auto border border-champagne/40 bg-[#f4f0e8] p-2 text-obsidian shadow-aureate"
+          className="absolute z-20 mt-2 max-h-80 w-full overflow-auto rounded-lg border border-red-600/30 bg-white p-2 text-black shadow-aureate"
         >
           <input
             type="text"
@@ -720,7 +721,7 @@ function SearchableWatchSelect({
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder={selectedBrand ? "Filter watches" : "Filter brands"}
-            className="mb-2 h-11 w-full border border-[#c7b57e] bg-white px-3 text-sm font-semibold text-obsidian outline-none placeholder:text-[#6f6758] focus:border-[#8d6a2d] focus:ring-2 focus:ring-[#d8c391]/50"
+            className="mb-2 h-11 w-full rounded-md border border-zinc-200 bg-zinc-50 px-3 text-sm font-semibold text-black outline-none placeholder:text-zinc-500 focus:border-red-600 focus:ring-2 focus:ring-red-600/20"
           />
           {selectedBrand ? (
             <>
@@ -730,7 +731,7 @@ function SearchableWatchSelect({
                   setSelectedBrand(null);
                   setQuery("");
                 }}
-                className="mb-2 block w-full border border-[#c7b57e] bg-[#ece3cf] px-3 py-2 text-left text-xs font-bold uppercase tracking-[0.16em] text-[#6f5425] transition hover:bg-[#ded0a8] focus:bg-[#ded0a8] focus:outline-none"
+                className="mb-2 block w-full rounded-md border border-zinc-200 bg-zinc-100 px-3 py-2 text-left text-xs font-bold uppercase tracking-[0.16em] text-zinc-700 transition hover:bg-zinc-200 focus:bg-zinc-200 focus:outline-none"
               >
                 Back to brands
               </button>
@@ -748,12 +749,12 @@ function SearchableWatchSelect({
                       setSelectedBrand(null);
                       setQuery("");
                     }}
-                    className="block w-full bg-transparent px-3 py-3 text-left text-obsidian transition hover:bg-[#ded0a8] hover:text-obsidian focus:bg-[#ded0a8] focus:text-obsidian focus:outline-none"
+                    className="block w-full rounded-md bg-transparent px-3 py-3 text-left text-black transition hover:bg-red-50 focus:bg-red-50 focus:outline-none"
                   >
-                    <span className="block text-sm font-semibold text-obsidian">
+                    <span className="block text-sm font-semibold text-black">
                       {watchName(watch)}
                     </span>
-                    <span className="mt-1 block text-xs font-semibold uppercase tracking-[0.18em] text-[#6f5425]">
+                    <span className="mt-1 block text-xs font-semibold uppercase tracking-[0.18em] text-red-600">
                       {watch.reference_number || "Reference not listed"}
                     </span>
                   </button>
@@ -776,12 +777,12 @@ function SearchableWatchSelect({
                   setSelectedBrand(brand);
                   setQuery("");
                 }}
-                className="flex w-full items-center justify-between gap-3 bg-transparent px-3 py-3 text-left text-obsidian transition hover:bg-[#ded0a8] hover:text-obsidian focus:bg-[#ded0a8] focus:text-obsidian focus:outline-none"
+                className="flex w-full items-center justify-between gap-3 rounded-md bg-transparent px-3 py-3 text-left text-black transition hover:bg-red-50 focus:bg-red-50 focus:outline-none"
               >
-                <span className="block text-sm font-semibold text-obsidian">
+                <span className="block text-sm font-semibold text-black">
                   {brand}
                 </span>
-                <span className="shrink-0 text-xs font-semibold uppercase tracking-[0.18em] text-[#6f5425]">
+                <span className="shrink-0 text-xs font-semibold uppercase tracking-[0.18em] text-red-600">
                   {count} watches
                 </span>
               </button>
@@ -807,23 +808,23 @@ function BenchImagePreview({
   const imageUrl = watchImageUrl(watch);
 
   return (
-    <section className="grid min-h-72 overflow-hidden border border-white/10 bg-white/[0.035] shadow-aureate sm:grid-cols-[minmax(0,1fr)_11rem]">
+    <section className="grid min-h-72 overflow-hidden border border-zinc-200 bg-white shadow-aureate sm:grid-cols-[minmax(0,1fr)_11rem]">
       <div className="flex flex-col justify-between gap-5 p-4 sm:p-5">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-champagne/80">
+          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-red-600/80">
             {label}
           </p>
-          <h3 className="mt-3 font-serif text-2xl leading-tight text-platinum">
+          <h3 className="mt-3 font-serif text-2xl leading-tight text-black">
             {watch ? watchName(watch) : "Select a watch"}
           </h3>
-          <p className="mt-2 text-xs font-semibold uppercase tracking-[0.18em] text-pewter">
+          <p className="mt-2 text-xs font-semibold uppercase tracking-[0.18em] text-zinc-600">
             {watch?.reference_number || "Reference not listed"}
           </p>
         </div>
         {watch ? (
           <Link
             href={`/watches/${watchSlug(watch)}`}
-            className="inline-flex w-fit border border-champagne/40 px-3 py-2 text-xs font-bold uppercase tracking-[0.16em] text-champagne transition hover:bg-champagne hover:text-obsidian focus:bg-champagne focus:text-obsidian focus:outline-none focus:ring-2 focus:ring-champagne/30"
+            className="inline-flex w-fit border border-red-600/40 px-3 py-2 text-xs font-bold uppercase tracking-[0.16em] text-red-600 transition hover:bg-red-600 hover:text-white focus:bg-red-600 focus:text-white focus:outline-none focus:ring-2 focus:ring-red-600/30"
           >
             View Details
           </Link>
@@ -832,12 +833,12 @@ function BenchImagePreview({
       {watch && imageUrl ? (
         <div
           aria-label={`${watchName(watch)} product image`}
-          className="min-h-72 border-t border-white/10 bg-white bg-contain bg-center bg-no-repeat sm:min-h-full sm:border-l sm:border-t-0"
+          className="min-h-72 border-t border-zinc-200 bg-white bg-contain bg-center bg-no-repeat sm:min-h-full sm:border-l sm:border-t-0"
           role="img"
           style={{ backgroundImage: `url("${imageUrl}")` }}
         />
       ) : (
-        <div className="grid min-h-72 place-items-center border-t border-white/10 bg-black/20 px-4 text-center text-sm text-pewter sm:min-h-full sm:border-l sm:border-t-0">
+        <div className="grid min-h-72 place-items-center border-t border-zinc-200 bg-zinc-50 px-4 text-center text-sm text-zinc-600 sm:min-h-full sm:border-l sm:border-t-0">
           Image not listed
         </div>
       )}
@@ -857,39 +858,39 @@ function SpecSection({
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <section className="border-b border-white/10 last:border-b-0">
+    <section className="border-b border-zinc-200 last:border-b-0">
       <button
         type="button"
         onClick={() => setExpanded((current) => !current)}
-        className="flex w-full items-center justify-between gap-4 bg-[#0d0c0a] px-3 py-3 text-left sm:px-5 md:pointer-events-none"
+        className="flex w-full items-center justify-between gap-4 bg-zinc-50 px-3 py-3 text-left sm:px-5 md:pointer-events-none"
       >
-        <h3 className="text-xs font-bold uppercase tracking-[0.24em] text-champagne">
+        <h3 className="text-xs font-bold uppercase tracking-[0.24em] text-red-600">
           {section.title}
         </h3>
-        <span className="text-xs font-bold uppercase tracking-[0.16em] text-pewter md:hidden">
+        <span className="text-xs font-bold uppercase tracking-[0.16em] text-zinc-600 md:hidden">
           {expanded ? "Hide" : "Show"}
         </span>
       </button>
       <div className={`${expanded ? "block" : "hidden"} md:block`}>
-        <dl className="divide-y divide-white/10">
+        <dl className="divide-y divide-zinc-200">
           {section.fields.map((field) => (
             <div
               key={field.key}
-              className={`grid grid-cols-[6.5rem_1fr_1fr] text-xs transition hover:bg-white/[0.035] sm:grid-cols-[12rem_1fr_1fr] sm:text-sm ${
+              className={`grid grid-cols-[6.5rem_1fr_1fr] text-xs transition hover:bg-white sm:grid-cols-[12rem_1fr_1fr] sm:text-sm ${
                 field.emphasis ? "bg-white/[0.018]" : ""
               }`}
             >
               <dt
                 className={`px-3 py-3 text-[0.68rem] font-semibold uppercase tracking-[0.1em] sm:px-5 sm:py-4 sm:text-xs sm:tracking-[0.14em] ${
-                  field.emphasis ? "text-platinum" : "text-pewter"
+                  field.emphasis ? "text-black" : "text-zinc-600"
                 }`}
               >
                 {field.label}
               </dt>
-              <dd className="border-l border-white/10 px-3 py-3 font-medium leading-5 text-platinum sm:px-5 sm:py-4 sm:leading-6">
+              <dd className="border-l border-zinc-200 px-3 py-3 font-medium leading-5 text-black sm:px-5 sm:py-4 sm:leading-6">
                 {display(fieldValue(watchA, field.key))}
               </dd>
-              <dd className="border-l border-white/10 px-3 py-3 font-medium leading-5 text-platinum sm:px-5 sm:py-4 sm:leading-6">
+              <dd className="border-l border-zinc-200 px-3 py-3 font-medium leading-5 text-black sm:px-5 sm:py-4 sm:leading-6">
                 {display(fieldValue(watchB, field.key))}
               </dd>
             </div>
@@ -908,15 +909,22 @@ function ComparisonTable({
   watchB: Watch | null;
 }) {
   return (
-    <section className="mt-6 overflow-hidden border border-white/10 bg-white/[0.045] shadow-aureate">
-      <div className="grid grid-cols-[6.5rem_1fr_1fr] border-b border-white/10 bg-black/20 sm:grid-cols-[12rem_1fr_1fr]">
+    <section className="mt-6 overflow-x-auto border border-zinc-200 bg-white shadow-aureate">
+      <div className="min-w-[42rem] sm:min-w-0">
+      <div className="grid grid-cols-[6.5rem_1fr_1fr] border-b border-zinc-200 bg-zinc-50 sm:grid-cols-[12rem_1fr_1fr]">
         <div className="px-3 py-4 sm:px-5">
-          <p className="text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-pewter">
+          <p className="text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-zinc-600">
             Compared
           </p>
         </div>
-        <WatchColumnHeader watch={watchA} label="Watch A" />
-        <WatchColumnHeader watch={watchB} label="Watch B" />
+        <WatchColumnHeader
+          watch={watchA}
+          label={watchA ? watchName(watchA) : "First reference"}
+        />
+        <WatchColumnHeader
+          watch={watchB}
+          label={watchB ? watchName(watchB) : "Second reference"}
+        />
       </div>
       {fieldSections.map((section) => (
         <SpecSection
@@ -926,6 +934,7 @@ function ComparisonTable({
           watchB={watchB}
         />
       ))}
+      </div>
     </section>
   );
 }
@@ -1001,7 +1010,7 @@ function recommendationIcon(item: string) {
   const text = normalizeRecommendationText(item);
 
   if (/\b(msrp|price|cost|value|money|budget|affordable|overpriced|undervalued)\b/.test(text)) {
-    return "💰";
+    return "•";
   }
 
   if (/\b(dial|design|style|aesthetic|visual|look|finishing|finish|polished|luxury feel)\b/.test(text)) {
@@ -1025,217 +1034,6 @@ function recommendationIcon(item: string) {
   }
 
   return "💎";
-}
-
-const scorecardCategories = [
-  "Movement",
-  "Case & Wearability",
-  "Dial & Legibility",
-  "Materials & Finishing",
-  "Features & Functionality",
-  "Brand & Heritage",
-  "Value Proposition",
-  "Ownership Experience",
-];
-
-type ScorecardRow = {
-  category: string;
-  watchA: number | null;
-  watchB: number | null;
-};
-
-function escapeRegExp(value: string) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-function scoreAliases(watch: Watch | null) {
-  if (!watch) {
-    return [];
-  }
-
-  return [
-    watchName(watch),
-    watch.reference_number,
-    watchBrand(watch),
-    watchCollection(watch),
-    watchModel(watch),
-  ]
-    .map((value) => normalizeNamePart(value))
-    .filter((value, index, values) => value && values.indexOf(value) === index);
-}
-
-function findLastAliasIndex(text: string, aliases: string[]) {
-  const normalized = text.toLowerCase();
-
-  return aliases.reduce((lastIndex, alias) => {
-    const index = normalized.lastIndexOf(alias.toLowerCase());
-    return Math.max(lastIndex, index);
-  }, -1);
-}
-
-function scoreBlockOwner(
-  precedingText: string,
-  watchA: Watch | null,
-  watchB: Watch | null,
-) {
-  const watchAIndex = findLastAliasIndex(precedingText, scoreAliases(watchA));
-  const watchBIndex = findLastAliasIndex(precedingText, scoreAliases(watchB));
-
-  if (watchAIndex === watchBIndex) {
-    return null;
-  }
-
-  return watchAIndex > watchBIndex ? "watchA" : "watchB";
-}
-
-function scoreSectionOwner(
-  section: string,
-  watchA: Watch | null,
-  watchB: Watch | null,
-) {
-  const heading = section.split(/\n+/)[0] ?? section;
-  const watchAIndex = findLastAliasIndex(heading, scoreAliases(watchA));
-  const watchBIndex = findLastAliasIndex(heading, scoreAliases(watchB));
-
-  if (watchAIndex === watchBIndex) {
-    return null;
-  }
-
-  return watchAIndex > watchBIndex ? "watchA" : "watchB";
-}
-
-function parseCategoryScore(block: string, category: string) {
-  const match = block.match(
-    new RegExp(`${escapeRegExp(category)}\\s*(?:[:\\-])?\\s*(\\d+(?:\\.\\d+)?)\\s*(?:/\\s*10)?`, "i"),
-  );
-
-  if (!match) {
-    return null;
-  }
-
-  const score = Number.parseFloat(match[1]);
-  return Number.isFinite(score) ? score : null;
-}
-
-function findScoreAfterAlias(text: string, aliases: string[]) {
-  const normalized = text.toLowerCase();
-
-  for (const alias of aliases) {
-    const index = normalized.indexOf(alias.toLowerCase());
-
-    if (index === -1) {
-      continue;
-    }
-
-    const afterAlias = text.slice(index + alias.length);
-    const match = afterAlias.match(/(\d+(?:\.\d+)?)\s*(?:\/\s*10)?/);
-
-    if (match) {
-      const score = Number.parseFloat(match[1]);
-      return Number.isFinite(score) ? score : null;
-    }
-  }
-
-  return null;
-}
-
-function parseScorecard(
-  text: string | null | undefined,
-  watchA: Watch | null,
-  watchB: Watch | null,
-) {
-  if (!text) {
-    return [];
-  }
-
-  const rows = scorecardCategories.map<ScorecardRow>((category) => ({
-    category,
-    watchA: null,
-    watchB: null,
-  }));
-  const watchAAliases = scoreAliases(watchA);
-  const watchBAliases = scoreAliases(watchB);
-  const sections = text
-    .split(/\n\s*\n+/)
-    .map((section) => section.trim())
-    .filter(Boolean);
-
-  for (const section of sections) {
-    const scorecardMatch = section.match(/scorecard:\s*([\s\S]*)/i);
-
-    if (!scorecardMatch) {
-      continue;
-    }
-
-    const owner = scoreSectionOwner(section, watchA, watchB);
-
-    for (const row of rows) {
-      const score = parseCategoryScore(scorecardMatch[1], row.category);
-
-      if (score === null) {
-        continue;
-      }
-
-      if (owner === "watchA") {
-        row.watchA = score;
-      } else if (owner === "watchB") {
-        row.watchB = score;
-      }
-    }
-  }
-
-  const scorecardRegex = /scorecard:\s*([\s\S]*?)(?=\n\s*\n|final verdict:|$)/gi;
-  let scorecardMatch: RegExpExecArray | null;
-
-  while ((scorecardMatch = scorecardRegex.exec(text))) {
-    const block = scorecardMatch[1];
-    const owner = scoreBlockOwner(
-      text.slice(Math.max(0, scorecardMatch.index - 500), scorecardMatch.index),
-      watchA,
-      watchB,
-    );
-
-    for (const row of rows) {
-      const score = parseCategoryScore(block, row.category);
-
-      if (score === null) {
-        continue;
-      }
-
-      if (owner === "watchA" && row.watchA === null) {
-        row.watchA = score;
-      } else if (owner === "watchB" && row.watchB === null) {
-        row.watchB = score;
-      }
-    }
-  }
-
-  for (const row of rows) {
-    if (row.watchA !== null && row.watchB !== null) {
-      continue;
-    }
-
-    const categoryMatch = text.match(
-      new RegExp(`${escapeRegExp(row.category)}\\s*:\\s*([^\\n]+)`, "i"),
-    );
-
-    if (!categoryMatch) {
-      continue;
-    }
-
-    row.watchA ??= findScoreAfterAlias(categoryMatch[1], watchAAliases);
-    row.watchB ??= findScoreAfterAlias(categoryMatch[1], watchBAliases);
-  }
-
-  return rows.filter((row) => row.watchA !== null || row.watchB !== null);
-}
-
-function scoreWidth(score: number | null) {
-  return `${Math.max(0, Math.min(100, ((score ?? 0) / 10) * 100))}%`;
-}
-
-function formatScore(score: number | null) {
-  return score === null ? "--" : score.toFixed(1);
 }
 
 function cleanVerdictText(text: string | null | undefined) {
@@ -1272,85 +1070,6 @@ function cleanVerdictText(text: string | null | undefined) {
     .trim() || null;
 }
 
-function Scorecard({
-  rows,
-  watchA,
-  watchB,
-}: {
-  rows: ScorecardRow[];
-  watchA: Watch | null;
-  watchB: Watch | null;
-}) {
-  if (!rows.length) {
-    return null;
-  }
-
-  return (
-    <div className="grid gap-4 border border-white/10 bg-black/20 p-4 sm:p-5">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-champagne/80">
-            Scorecard
-          </p>
-          <h3 className="mt-2 font-serif text-2xl leading-tight text-platinum">
-            Category scores out of 10
-          </h3>
-        </div>
-      </div>
-
-      <div className="grid gap-3">
-        <div className="grid gap-2 md:grid-cols-[12rem_1fr_1fr] md:items-end">
-          <span />
-          <div className="border border-champagne/35 px-3 py-2">
-            <p className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-champagne/80">
-              Watch A
-            </p>
-            <p className="mt-1 text-sm font-semibold leading-5 text-platinum">
-              {watchA ? watchName(watchA) : "Watch A"}
-            </p>
-          </div>
-          <div className="border border-cognac/45 px-3 py-2">
-            <p className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-cognac/90">
-              Watch B
-            </p>
-            <p className="mt-1 text-sm font-semibold leading-5 text-platinum">
-              {watchB ? watchName(watchB) : "Watch B"}
-            </p>
-          </div>
-        </div>
-        {rows.map((row) => {
-          const watchAWins = row.watchA !== null && row.watchB !== null && row.watchA > row.watchB;
-          const watchBWins = row.watchA !== null && row.watchB !== null && row.watchB > row.watchA;
-
-          return (
-            <div key={row.category} className="grid gap-2 border-t border-white/10 pt-3 first:border-t-0 first:pt-0 md:grid-cols-[12rem_1fr_1fr] md:items-center">
-              <p className="text-sm font-semibold text-platinum">{row.category}</p>
-              <div>
-                <div className="mb-1 flex items-center justify-between gap-3 text-xs uppercase tracking-[0.14em] text-pewter">
-                  <span className="md:hidden">Watch A</span>
-                  <span className={watchAWins ? "text-champagne" : "text-platinum"}>{formatScore(row.watchA)}</span>
-                </div>
-                <div className="h-2 overflow-hidden bg-white/10">
-                  <div className="h-full bg-champagne" style={{ width: scoreWidth(row.watchA) }} />
-                </div>
-              </div>
-              <div>
-                <div className="mb-1 flex items-center justify-between gap-3 text-xs uppercase tracking-[0.14em] text-pewter">
-                  <span className="md:hidden">Watch B</span>
-                  <span className={watchBWins ? "text-cognac" : "text-platinum"}>{formatScore(row.watchB)}</span>
-                </div>
-                <div className="h-2 overflow-hidden bg-white/10">
-                  <div className="h-full bg-cognac" style={{ width: scoreWidth(row.watchB) }} />
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
 function DecisionSummary({
   recommendations,
   watchA,
@@ -1364,28 +1083,28 @@ function DecisionSummary({
   const columns = [
     {
       key: "watch-a",
-      label: "Watch A",
-      name: watchA ? watchName(watchA) : "Watch A",
+      label: "Best fit",
+      name: watchA ? watchName(watchA) : "First reference",
       items: groups.watchA,
-      border: "border-champagne/35",
+      border: "border-red-600/35",
     },
     {
       key: "watch-b",
-      label: "Watch B",
-      name: watchB ? watchName(watchB) : "Watch B",
+      label: "Best fit",
+      name: watchB ? watchName(watchB) : "Second reference",
       items: groups.watchB,
       border: "border-cognac/45",
     },
   ];
 
   return (
-    <div className="grid gap-4 border border-white/10 bg-black/20 p-4 sm:p-5">
+    <div className="grid gap-4 border border-zinc-200 bg-zinc-50 p-4 sm:p-5">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-champagne/80">
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-red-600/80">
             Decision snapshot
           </p>
-          <h3 className="mt-2 font-serif text-2xl leading-tight text-platinum">
+          <h3 className="mt-2 font-serif text-2xl leading-tight text-black">
             Best suited for
           </h3>
         </div>
@@ -1395,19 +1114,19 @@ function DecisionSummary({
         {columns.map((column) => (
           <section
             key={column.key}
-            className={`border ${column.border} bg-white/[0.035] p-4`}
+            className={`border ${column.border} bg-white p-4`}
           >
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-pewter">
+                <p className="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-zinc-600">
                   {column.label}
                 </p>
-                <h4 className="mt-2 text-base font-semibold leading-6 text-platinum">
+                <h4 className="mt-2 text-base font-semibold leading-6 text-black">
                   {column.name}
                 </h4>
               </div>
             </div>
-            <ul className="mt-4 grid gap-2 text-sm leading-6 text-pewter">
+            <ul className="mt-4 grid gap-2 text-sm leading-6 text-zinc-600">
               {column.items.length ? (
                 column.items.map((item) => (
                   <li key={item} className="grid grid-cols-[1.5rem_1fr] gap-2">
@@ -1422,7 +1141,7 @@ function DecisionSummary({
                   <span aria-hidden="true" className="text-base leading-6">
                     🕰️
                   </span>
-                  <span>No explicit buyer-fit points for this watch yet.</span>
+                  <span>No explicit preference-fit points for this watch yet.</span>
                 </li>
               )}
             </ul>
@@ -1431,11 +1150,11 @@ function DecisionSummary({
       </div>
 
       {groups.either.length ? (
-        <section className="border border-white/10 bg-white/[0.025] p-4">
-          <p className="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-pewter">
+        <section className="border border-zinc-200 bg-white p-4">
+          <p className="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-zinc-600">
             Either watch
           </p>
-          <ul className="mt-3 grid gap-2 text-sm leading-6 text-pewter sm:grid-cols-2">
+          <ul className="mt-3 grid gap-2 text-sm leading-6 text-zinc-600 sm:grid-cols-2">
             {groups.either.map((item) => (
               <li key={item} className="grid grid-cols-[1.5rem_1fr] gap-2">
                 <span aria-hidden="true" className="text-base leading-6">
@@ -1455,117 +1174,151 @@ function PairComparisonPanel({
   watchA,
   watchB,
   panelRef,
+  initialComparison = null,
 }: {
   watchA: Watch | null;
   watchB: Watch | null;
   panelRef?: RefObject<HTMLElement | null>;
+  initialComparison?: PairComparisonResult | null;
 }) {
-  const [comparison, setComparison] = useState<PairComparisonResult | null>(null);
+  const [comparison, setComparison] = useState<PairComparisonResult | null>(
+    initialComparison,
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const aId = watchId(watchA);
   const bId = watchId(watchB);
-  const canCompare = Boolean(aId && bId && aId !== bId);
-  const scorecardRows = parseScorecard(
-    comparison?.enthusiast_take,
-    watchA,
-    watchB,
-  );
+  const pairRequestKey =
+    aId && bId && aId !== bId ? [aId, bId].sort().join(":") : null;
   const verdictText = cleanVerdictText(comparison?.enthusiast_take);
 
-  async function compareWithAI() {
-    if (!aId || !bId || aId === bId) return;
-
-    setLoading(true);
-    setError(null);
-    setComparison(null);
-
-    try {
-      const response = await fetch("/api/compare-ai", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ watchAId: aId, watchBId: bId }),
-      });
-      const payload = (await response.json()) as {
-        comparison?: PairComparisonResult;
-        error?: string;
-      };
-
-      if (!response.ok || !payload.comparison) {
-        throw new Error(payload.error ?? "Unable to compare these watches.");
-      }
-
-      setComparison(payload.comparison);
-    } catch (caughtError) {
-      setError(
-        caughtError instanceof Error
-          ? caughtError.message
-          : "Unable to compare these watches.",
-      );
-    } finally {
+  useEffect(() => {
+    if (!pairRequestKey || !aId || !bId) {
+      setComparison(null);
       setLoading(false);
+      setError(null);
+      return;
     }
-  }
+
+    if (initialComparison) {
+      setComparison(initialComparison);
+      setLoading(false);
+      setError(null);
+      return;
+    }
+
+    let active = true;
+
+    async function loadComparison() {
+      setLoading(true);
+      setError(null);
+      setComparison(null);
+
+      try {
+        const response = await fetch("/api/compare-ai", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ watchAId: aId, watchBId: bId }),
+        });
+        const payload = (await response.json()) as {
+          comparison?: PairComparisonResult;
+          error?: string;
+        };
+
+        if (!response.ok || !payload.comparison) {
+          throw new Error(payload.error ?? "Unable to compare these watches.");
+        }
+
+        if (active) {
+          setComparison(payload.comparison);
+        }
+      } catch (caughtError) {
+        if (active) {
+          setError(
+            caughtError instanceof Error
+              ? caughtError.message
+              : "Unable to compare these watches.",
+          );
+        }
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadComparison();
+
+    return () => {
+      active = false;
+    };
+  }, [aId, bId, initialComparison, pairRequestKey]);
 
   return (
     <section
       ref={panelRef}
-      className="scroll-mt-4 border border-champagne/20 bg-black/25 p-5 shadow-aureate sm:p-6"
+      className="scroll-mt-4 border border-red-600/20 bg-white p-5 shadow-aureate sm:p-6"
     >
-      <div className="grid gap-5 lg:grid-cols-[1fr_auto] lg:items-center">
+      <div className="grid gap-5">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.28em] text-champagne">
-            AI Pair Review
+          <p className="text-xs font-bold uppercase tracking-[0.28em] text-red-600">
+            Pair Review
           </p>
-          <h2 className="mt-3 font-serif text-3xl leading-tight text-platinum sm:text-4xl">
-            Ask AI for a head-to-head enthusiast verdict.
+          <h2 className="mt-3 font-serif text-3xl leading-tight text-black sm:text-4xl">
+            Head-to-head enthusiast verdict
           </h2>
-          <p className="mt-3 max-w-3xl text-sm leading-6 text-pewter">
+          <p className="mt-3 max-w-3xl text-sm leading-6 text-zinc-600">
             Scores are based on the saved specs and wearability notes for these
             two watches, then weighted against enthusiast priorities like fit,
             movement quality, practicality, finishing, value, and collector
             appeal.
           </p>
         </div>
-        <button
-          type="button"
-          disabled={!canCompare || loading}
-          onClick={compareWithAI}
-          className="hidden h-12 border border-champagne bg-champagne px-5 text-sm font-bold uppercase tracking-[0.18em] text-obsidian transition hover:bg-platinum disabled:cursor-not-allowed disabled:border-white/15 disabled:bg-white/10 disabled:text-pewter sm:block"
-        >
-          {loading ? "Building Review..." : "Compare With AI"}
-        </button>
       </div>
 
       {error ? (
-        <p className="mt-5 border border-red-300/25 bg-red-950/25 p-4 text-sm leading-6 text-red-100">
+        <p className="mt-5 border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-900">
           {error}
         </p>
       ) : null}
 
+      {loading ? (
+        <div className="mt-6 grid gap-4 border-t border-zinc-200 pt-5">
+          <div className="h-5 w-4/5 animate-pulse bg-zinc-100" />
+          <div className="grid gap-px bg-zinc-100 md:grid-cols-2">
+            {[0, 1, 2, 3].map((item) => (
+              <div key={item} className="bg-white p-4">
+                <div className="h-3 w-28 animate-pulse bg-red-100" />
+                <div className="mt-3 h-4 w-full animate-pulse bg-zinc-100" />
+                <div className="mt-2 h-4 w-3/4 animate-pulse bg-zinc-100" />
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
       {comparison ? (
-        <div className="mt-6 grid gap-4 border-t border-white/10 pt-5">
-          <p className="text-base leading-7 text-platinum">{comparison.summary}</p>
-          <div className="grid gap-px bg-white/10 md:grid-cols-2">
+        <div className="mt-6 grid gap-4 border-t border-zinc-200 pt-5">
+          <p className="text-base leading-7 text-black">{comparison.summary}</p>
+          <div className="grid gap-px bg-zinc-100 md:grid-cols-2">
             {[
               ["Movement", comparison.movement_comparison],
               ["Case & Wearability", comparison.fit_comparison],
               ["Daily Use, Dial & Materials", comparison.daily_wear_comparison],
               ["Brand, Ownership & Value", comparison.value_comparison],
             ].map(([label, value]) => (
-              <div key={label} className="bg-[#100f0d] p-4">
-                <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-champagne/80">
+              <div key={label} className="bg-white p-4">
+                <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-red-600/80">
                   {label}
                 </h3>
-                <p className="mt-2 text-sm leading-6 text-platinum">
+                <p className="mt-2 text-sm leading-6 text-black">
                   {value || "Not enough verified data listed yet."}
                 </p>
               </div>
             ))}
           </div>
-          <Scorecard rows={scorecardRows} watchA={watchA} watchB={watchB} />
           {verdictText ? (
-            <p className="whitespace-pre-line border-l border-champagne/40 pl-4 text-sm leading-6 text-pewter">
+            <p className="whitespace-pre-line border-l border-red-600/40 pl-4 text-sm leading-6 text-zinc-600">
               {verdictText}
             </p>
           ) : null}
@@ -1576,18 +1329,6 @@ function PairComparisonPanel({
               watchB={watchB}
             />
           ) : null}
-        </div>
-      ) : null}
-      {canCompare ? (
-        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-champagne/30 bg-[#080706]/95 p-3 shadow-[0_-18px_42px_rgba(0,0,0,0.42)] backdrop-blur sm:hidden">
-          <button
-            type="button"
-            disabled={loading}
-            onClick={compareWithAI}
-            className="h-12 w-full border border-champagne bg-champagne px-4 text-sm font-bold uppercase tracking-[0.16em] text-obsidian transition hover:bg-platinum disabled:cursor-not-allowed disabled:border-white/15 disabled:bg-white/10 disabled:text-pewter"
-          >
-            {loading ? "Building Review..." : "Compare With AI"}
-          </button>
         </div>
       ) : null}
     </section>
@@ -1617,15 +1358,14 @@ function PopularComparisons({
   );
 
   return (
-    <section className="mt-5 border-t border-white/10 pt-5">
+    <section className="mt-5 border-t border-zinc-200 pt-5">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-champagne/80">
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-red-600/80">
             Need a second watch?
           </p>
-          <p className="mt-2 text-sm text-pewter">
-            Load a popular pairing, then run the AI comparison when you are
-            ready.
+          <p className="mt-2 text-sm text-zinc-600">
+            Load a popular pairing or open its dedicated 1v1 page.
           </p>
         </div>
       </div>
@@ -1639,25 +1379,35 @@ function PopularComparisons({
           }
 
           return (
-            <button
+            <div
               key={`${comparison.watchAId}:${comparison.watchBId}`}
-              type="button"
-              onClick={() => onSelectPair(comparison)}
-              className="group min-h-28 border border-white/10 bg-white/[0.035] p-3 text-left transition hover:border-champagne/45 hover:bg-white/[0.06] focus:border-champagne/60 focus:outline-none focus:ring-2 focus:ring-champagne/20 sm:min-h-36 sm:p-4"
+              className="group min-h-28 border border-zinc-200 bg-white p-3 text-left transition hover:border-red-600/45 hover:bg-red-50 sm:min-h-36 sm:p-4"
             >
-              <p className="text-sm font-semibold leading-5 text-platinum">
+              <p className="text-sm font-semibold leading-5 text-black">
                 {watchName(watchA)}
               </p>
-              <p className="mt-2 text-[0.68rem] font-bold uppercase tracking-[0.18em] text-pewter">
+              <p className="mt-2 text-[0.68rem] font-bold uppercase tracking-[0.18em] text-zinc-600">
                 vs
               </p>
-              <p className="mt-2 text-sm font-semibold leading-5 text-platinum">
+              <p className="mt-2 text-sm font-semibold leading-5 text-black">
                 {watchName(watchB)}
               </p>
-              <span className="mt-4 inline-block text-xs font-bold uppercase tracking-[0.16em] text-champagne opacity-80 transition group-hover:opacity-100">
-                Load pair
-              </span>
-            </button>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => onSelectPair(comparison)}
+                  className="border border-red-600/35 px-3 py-2 text-xs font-bold uppercase tracking-[0.14em] text-red-600 transition hover:bg-red-600 hover:text-white focus:bg-red-600 focus:text-white focus:outline-none"
+                >
+                  Load pair
+                </button>
+                <Link
+                  href={pairPath(watchA, watchB)}
+                  className="border border-zinc-200 px-3 py-2 text-xs font-bold uppercase tracking-[0.14em] text-zinc-600 transition hover:border-red-600/40 hover:text-red-600 focus:border-red-600/40 focus:text-red-600 focus:outline-none"
+                >
+                  1v1 page
+                </Link>
+              </div>
+            </div>
           );
         })}
       </div>
@@ -1670,11 +1420,15 @@ export function CompareClient({
   defaultWatchAId,
   defaultWatchBId,
   popularComparisons = [],
+  presentation = "bench",
+  initialComparison = null,
 }: {
   watches: Watch[];
   defaultWatchAId?: string | null;
   defaultWatchBId?: string | null;
   popularComparisons?: PopularComparison[];
+  presentation?: "bench" | "pair";
+  initialComparison?: PairComparisonResult | null;
 }) {
   const aiPanelRef = useRef<HTMLElement | null>(null);
   const watchesWithMeasurements = watches.filter(hasFitMeasurements);
@@ -1726,60 +1480,73 @@ export function CompareClient({
 
   if (watches.length === 0) {
     return (
-      <div className="rounded border border-white/10 bg-white/[0.04] p-8 text-sm text-pewter">
-        No watches are available yet.
+      <div className="rounded border border-zinc-200 bg-white p-8 text-sm text-zinc-600">
+        No watches are listed yet.
       </div>
     );
   }
 
   return (
     <>
-      <div className="border border-white/10 bg-black/25 p-4 shadow-aureate sm:p-5">
-        <div className="mb-4 flex flex-wrap items-end justify-between gap-3 border-b border-white/10 pb-4">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-champagne/80">
-              Comparison bench
-            </p>
-            <p className="mt-2 text-sm text-pewter">
-              Pick two references to compare proportions, specs, and buying
-              context.
-            </p>
+      {presentation === "bench" ? (
+        <div className="border border-zinc-200 bg-white p-4 shadow-aureate sm:p-5">
+          <div className="mb-4 flex flex-wrap items-end justify-between gap-3 border-b border-zinc-200 pb-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-red-600/80">
+                Comparison bench
+              </p>
+              <p className="mt-2 text-sm text-zinc-600">
+                Search by brand or reference, then compare proportions, specs,
+                reviews, and research context.
+              </p>
+            </div>
+            {watchA && watchB ? (
+              <Link
+                href={pairPath(watchA, watchB)}
+                className="border border-zinc-200 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-zinc-600 transition hover:border-red-600/40 hover:text-red-600"
+              >
+                Open 1v1 Page
+              </Link>
+            ) : null}
           </div>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <SearchableWatchSelect
-            label="Watch A"
+          <div className="grid gap-4 sm:grid-cols-2">
+            <SearchableWatchSelect
+              label="Watch A"
+              watches={watches}
+              selectedKey={watchAKey}
+              onSelect={setWatchAKey}
+            />
+            <SearchableWatchSelect
+              label="Watch B"
+              watches={watches}
+              selectedKey={watchBKey}
+              onSelect={setWatchBKey}
+            />
+          </div>
+          <div className="mt-4 grid gap-4 lg:grid-cols-2">
+            <BenchImagePreview watch={watchA} label="Watch A" />
+            <BenchImagePreview watch={watchB} label="Watch B" />
+          </div>
+          <PopularComparisons
+            comparisons={popularComparisons}
             watches={watches}
-            selectedKey={watchAKey}
-            onSelect={setWatchAKey}
-          />
-          <SearchableWatchSelect
-            label="Watch B"
-            watches={watches}
-            selectedKey={watchBKey}
-            onSelect={setWatchBKey}
+            onSelectPair={selectPopularComparison}
           />
         </div>
-        <div className="mt-4 grid gap-4 lg:grid-cols-2">
-          <BenchImagePreview watch={watchA} label="Watch A" />
-          <BenchImagePreview watch={watchB} label="Watch B" />
+      ) : null}
+
+      {presentation === "bench" ? (
+        <div className="mt-5">
+          <CollectorRead watchA={watchA} watchB={watchB} />
         </div>
-        <PopularComparisons
-          comparisons={popularComparisons}
-          watches={watches}
-          onSelectPair={selectPopularComparison}
-        />
-      </div>
+      ) : null}
 
-      <div className="mt-5">
-        <CollectorRead watchA={watchA} watchB={watchB} />
-      </div>
-
-      <div className="mt-6">
+      <div className={presentation === "pair" ? "" : "mt-6"}>
         <PairComparisonPanel
           watchA={watchA}
           watchB={watchB}
           panelRef={aiPanelRef}
+          initialComparison={initialComparison}
         />
       </div>
 

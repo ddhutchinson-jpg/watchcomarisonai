@@ -19,6 +19,11 @@ type ComparisonEventRow = {
   created_at: string;
 };
 
+type WatchViewEventRow = {
+  watch_id: string;
+  created_at: string;
+};
+
 type PairComparisonRow = {
   id: string;
   watch_a_id: string;
@@ -43,6 +48,13 @@ type TopPair = {
   watchAId: string;
   watchBId: string;
   requestCount: number;
+};
+
+type TopWatch = {
+  watchId: string;
+  viewCount: number;
+  comparisonCount: number;
+  totalCount: number;
 };
 
 const topPairWindowDays = 30;
@@ -98,7 +110,7 @@ function pairName(
 }
 
 async function countRows(
-  table: "watch_comparison_events" | "watch_pair_comparisons",
+  table: "watch_comparison_events" | "watch_pair_comparisons" | "watch_view_events",
   createdAfter?: string,
 ) {
   let query = supabaseAdmin.from(table).select("*", {
@@ -118,6 +130,23 @@ async function countRows(
   }
 
   return count ?? 0;
+}
+
+async function loadRecentWatchViews(since: string) {
+  const { data, error } = await supabaseAdmin
+    .from("watch_view_events")
+    .select("watch_id,created_at")
+    .gte("created_at", since)
+    .order("created_at", { ascending: false })
+    .limit(5000)
+    .returns<WatchViewEventRow[]>();
+
+  if (error) {
+    if (isMissingMetricsTableError(error.code)) return null;
+    throw new Error(error.message);
+  }
+
+  return data ?? [];
 }
 
 async function loadRecentEvents(since: string) {
@@ -191,33 +220,84 @@ function topPairsFromEvents(events: ComparisonEventRow[]) {
     .slice(0, 5);
 }
 
+function topWatchesFromActivity(
+  watchViews: WatchViewEventRow[],
+  comparisonEvents: ComparisonEventRow[],
+) {
+  const watchCounts = new Map<string, TopWatch>();
+
+  function currentFor(watchId: string) {
+    const current = watchCounts.get(watchId) ?? {
+      watchId,
+      viewCount: 0,
+      comparisonCount: 0,
+      totalCount: 0,
+    };
+
+    watchCounts.set(watchId, current);
+    return current;
+  }
+
+  for (const event of watchViews) {
+    const current = currentFor(event.watch_id);
+    current.viewCount += 1;
+    current.totalCount += 1;
+  }
+
+  for (const event of comparisonEvents) {
+    for (const watchId of [event.watch_a_id, event.watch_b_id]) {
+      const current = currentFor(watchId);
+      current.comparisonCount += 1;
+      current.totalCount += 1;
+    }
+  }
+
+  return [...watchCounts.values()]
+    .sort((left, right) => right.totalCount - left.totalCount)
+    .slice(0, 5);
+}
+
 async function loadDashboardData() {
   const todayIso = startOfToday().toISOString();
   const topPairSinceIso = daysAgo(topPairWindowDays).toISOString();
 
   const [
     compareRequestsToday,
+    watchOpensToday,
     newGenerationsToday,
     allCompareRequests,
+    allWatchOpens,
     allGeneratedComparisons,
     recentEvents,
+    recentWatchViews,
     recentComparisons,
   ] = await Promise.all([
     countRows("watch_comparison_events", todayIso),
+    countRows("watch_view_events", todayIso),
     countRows("watch_pair_comparisons", todayIso),
     countRows("watch_comparison_events"),
+    countRows("watch_view_events"),
     countRows("watch_pair_comparisons"),
     loadRecentEvents(topPairSinceIso),
+    loadRecentWatchViews(topPairSinceIso),
     loadRecentComparisons(),
   ]);
 
   const topPairs = topPairsFromEvents(recentEvents ?? []);
+  const topWatches = topWatchesFromActivity(
+    recentWatchViews ?? [],
+    recentEvents ?? [],
+  );
   const latestComparisons = (recentComparisons ?? []).slice(0, recentLimit);
   const watchIds = new Set<string>();
 
   for (const pair of topPairs) {
     watchIds.add(pair.watchAId);
     watchIds.add(pair.watchBId);
+  }
+
+  for (const watch of topWatches) {
+    watchIds.add(watch.watchId);
   }
 
   for (const comparison of latestComparisons) {
@@ -229,17 +309,24 @@ async function loadDashboardData() {
 
   return {
     compareRequestsToday,
+    watchOpensToday,
     newGenerationsToday,
     savedComparisonReusesToday:
       compareRequestsToday === null || newGenerationsToday === null
         ? null
         : Math.max(compareRequestsToday - newGenerationsToday, 0),
     allCompareRequests,
+    allWatchOpens,
     allGeneratedComparisons,
     topPairs,
+    topWatches,
     latestComparisons,
     watchLookup,
-    eventsTableMissing: recentEvents === null || compareRequestsToday === null,
+    eventsTableMissing:
+      recentEvents === null ||
+      recentWatchViews === null ||
+      compareRequestsToday === null ||
+      watchOpensToday === null,
     comparisonsTableMissing:
       recentComparisons === null || newGenerationsToday === null,
   };
@@ -287,7 +374,7 @@ export default async function AdminDashboardPage() {
               href="/"
               className="text-xs font-semibold uppercase tracking-[0.35em] text-champagne"
             >
-              Watch Compare AI
+              DeezWatchez
             </Link>
             <Link
               href="/admin/spec-review"
@@ -327,6 +414,11 @@ export default async function AdminDashboardPage() {
             value={dashboard.compareRequestsToday}
           />
           <MetricCard
+            detail="Individual watch detail pages opened since local midnight."
+            label="Watch Opens Today"
+            value={dashboard.watchOpensToday}
+          />
+          <MetricCard
             detail="New rows created in saved AI pair comparisons today."
             label="New AI Generations"
             value={dashboard.newGenerationsToday}
@@ -341,9 +433,50 @@ export default async function AdminDashboardPage() {
             label="All Requests"
             value={dashboard.allCompareRequests}
           />
+          <MetricCard
+            detail="Lifetime individual watch opens recorded by the event table."
+            label="All Watch Opens"
+            value={dashboard.allWatchOpens}
+          />
         </section>
 
         <section className="grid gap-6 xl:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
+          <div className="grid gap-6">
+          <div className="border border-white/10 bg-white/[0.04]">
+            <div className="border-b border-white/10 p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-champagne/80">
+                Top Watches
+              </p>
+              <h2 className="mt-2 font-serif text-2xl text-platinum">
+                Last {topPairWindowDays} Days
+              </h2>
+            </div>
+            <div className="grid gap-3 p-4">
+              {dashboard.topWatches.length > 0 ? (
+                dashboard.topWatches.map((watch, index) => (
+                  <div
+                    className="grid gap-3 border border-white/10 bg-black/20 p-3 sm:grid-cols-[2rem_minmax(0,1fr)_auto] sm:items-center"
+                    key={watch.watchId}
+                  >
+                    <span className="font-serif text-2xl text-champagne">
+                      {index + 1}
+                    </span>
+                    <p className="text-sm font-semibold leading-6 text-platinum">
+                      {watchName(dashboard.watchLookup.get(watch.watchId))}
+                    </p>
+                    <span className="w-fit border border-champagne/20 px-2 py-1 text-xs font-semibold text-champagne">
+                      {formatNumber(watch.totalCount)} total /{" "}
+                      {formatNumber(watch.viewCount)} opens /{" "}
+                      {formatNumber(watch.comparisonCount)} compares
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <EmptyState message="No watch activity has been recorded in this window yet." />
+              )}
+            </div>
+          </div>
+
           <div className="border border-white/10 bg-white/[0.04]">
             <div className="border-b border-white/10 p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-champagne/80">
@@ -375,6 +508,7 @@ export default async function AdminDashboardPage() {
                 <EmptyState message="No compare requests have been recorded in this window yet." />
               )}
             </div>
+          </div>
           </div>
 
           <div className="border border-white/10 bg-white/[0.04]">
@@ -447,7 +581,7 @@ export default async function AdminDashboardPage() {
                 </table>
               ) : (
                 <div className="p-4">
-                  <EmptyState message="No generated AI comparisons have been saved yet." />
+                  <EmptyState message="No generated pair reviews have been saved yet." />
                 </div>
               )}
             </div>

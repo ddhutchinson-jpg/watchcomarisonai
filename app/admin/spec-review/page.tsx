@@ -20,6 +20,7 @@ type WatchReviewRow = {
   lug_width_mm: string | number | null;
   weight_grams: string | number | null;
   water_resistance_m: string | number | null;
+  crystal_type: string | null;
   date_display: boolean | null;
   has_chronograph: boolean | null;
   has_gmt: boolean | null;
@@ -81,6 +82,7 @@ const mvpFields = [
   "lug_width_mm",
   "weight_grams",
   "water_resistance_m",
+  "crystal_type",
   "date_display",
   "has_chronograph",
   "has_gmt",
@@ -241,6 +243,7 @@ function missingFields(watch: WatchReviewRow) {
     !watch.lug_width_mm ? "lug_width_mm" : null,
     !watch.weight_grams ? "weight_grams" : null,
     !watch.water_resistance_m ? "water_resistance_m" : null,
+    !watch.crystal_type ? "crystal_type" : null,
     watch.date_display === null ? "date_display" : null,
     watch.has_chronograph === null ? "has_chronograph" : null,
     watch.has_gmt === null ? "has_gmt" : null,
@@ -268,6 +271,22 @@ function candidateFieldOptions(missing: string[]) {
 
 function hasCanonicalValue(value: unknown) {
   return value !== null && value !== undefined && value !== "";
+}
+
+function shouldPromoteCandidateValue(
+  fieldName: string,
+  currentValue: unknown,
+  pendingValue: unknown,
+) {
+  if (hasCanonicalValue(pendingValue)) {
+    return false;
+  }
+
+  if (!hasCanonicalValue(currentValue)) {
+    return true;
+  }
+
+  return booleanFields.has(fieldName) && currentValue === false;
 }
 
 function parseBoolean(value: string) {
@@ -538,19 +557,20 @@ async function promoteCandidateSpecsForWatch(watchId: string) {
       continue;
     }
 
-    if (
-      hasCanonicalValue(spec[candidate.field_name]) ||
-      hasCanonicalValue(specUpdates[candidate.field_name])
-    ) {
-      continue;
-    }
-
     const parsedValue = parseCandidateValue(
       candidate.field_name,
       candidate.candidate_value,
     );
 
-    if (parsedValue !== null && parsedValue !== "") {
+    if (
+      parsedValue !== null &&
+      parsedValue !== "" &&
+      shouldPromoteCandidateValue(
+        candidate.field_name,
+        spec[candidate.field_name],
+        specUpdates[candidate.field_name],
+      )
+    ) {
       specUpdates[candidate.field_name] = parsedValue;
     }
   }
@@ -646,6 +666,7 @@ async function loadReviewData(selectedWatchId?: string) {
         "lug_width_mm",
         "weight_grams",
         "water_resistance_m",
+        "crystal_type",
         "date_display",
         "has_chronograph",
         "has_gmt",

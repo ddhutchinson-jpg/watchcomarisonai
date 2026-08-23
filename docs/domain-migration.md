@@ -24,7 +24,7 @@ In the existing Vercel project, add these domains:
 Set these environment variables for Production, Preview, and Development as appropriate:
 
 - `NEXT_PUBLIC_SITE_URL=https://deezwatchez.com`
-- `NEXT_PUBLIC_CONTACT_EMAIL=contact@deezwatchez.com`
+- `NEXT_PUBLIC_CONTACT_EMAIL=ddhutchinson@gmail.com`
 
 Keep the existing Supabase and OpenAI variables unchanged unless the backing services are intentionally moved.
 
@@ -66,6 +66,6 @@ Before switching traffic:
 - Confirm `https://watchcompareai.com/compare` redirects to `https://deezwatchez.com/compare`.
 - Confirm admin routes still require the existing password.
 - Confirm Supabase-backed pages and AI comparison generation still work.
-- Confirm contact email forwarding or mailbox setup exists for `contact@deezwatchez.com`.
+- Confirm contact email forwarding or mailbox setup exists for `ddhutchinson@gmail.com`.
 
 After launch, update Google Search Console, analytics, affiliate profiles, social profiles, and any external links that still point to `watchcompareai.com`.
