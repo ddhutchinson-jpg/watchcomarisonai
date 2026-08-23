@@ -1,18 +1,22 @@
+import Image from "next/image";
 import Link from "next/link";
 
 export function BrandMark() {
   return (
     <Link
       href="/"
-      className="group inline-flex items-center gap-2 transition"
+      className="group inline-flex h-11 w-44 items-center transition sm:h-12 sm:w-52"
       aria-label="DeezWatchez home"
     >
-      <span className="grid size-9 place-items-center rounded-md bg-red-600 text-sm font-black text-white shadow-sm shadow-red-600/20">
-        DW
-      </span>
-      <span className="text-lg font-black tracking-normal text-black transition group-hover:text-red-600 sm:text-xl">
-        DeezWatchez
-      </span>
+      <Image
+        src="/deezwatchez-logo-light.png"
+        alt="DeezWatchez"
+        width={1000}
+        height={311}
+        className="h-9 w-auto object-contain transition group-hover:brightness-95 sm:h-10"
+        sizes="(min-width: 640px) 13rem, 11rem"
+        priority
+      />
     </Link>
   );
 }
