@@ -1042,7 +1042,18 @@ function cleanVerdictText(text: string | null | undefined) {
     return null;
   }
 
-  const lines = text
+  const withoutScoreSections = text
+    .replace(
+      /\b(?:category\s*)?score(?:card|s)?(?:\s+summary)?\s*:?\s*[\s\S]*?(?=\bfinal\s+verdict\b|$)/gi,
+      "",
+    )
+    .replace(
+      /^(?:[-*]\s*)?(?:movement|case\s*&\s*wearability|dial\s*&\s*legibility|materials\s*&\s*finishing|features\s*&\s*functionality|brand\s*&\s*heritage|value\s+proposition|ownership\s+experience)\s*:.*\b\d{1,2}(?:\.\d+)?\s*\/\s*10\b.*$/gim,
+      "",
+    )
+    .replace(/^.*\bscore(?:card|s)?\b.*$/gim, "");
+
+  const lines = withoutScoreSections
     .split(/\n+/)
     .map((line) => line.trim())
     .filter(Boolean);
@@ -1068,6 +1079,7 @@ function cleanVerdictText(text: string | null | undefined) {
     .replace(/\bPros:\s*[\s\S]*?(?=\bCons:|\bScorecard:|\bFinal verdict:|$)/gi, "")
     .replace(/\bCons:\s*[\s\S]*?(?=\bScorecard:|\bFinal verdict:|$)/gi, "")
     .replace(/\bScorecard:\s*[\s\S]*?(?=\bFinal verdict:|$)/gi, "")
+    .replace(/\bFinal verdict\s*:\s*/i, "")
     .trim() || null;
 }
 
@@ -1269,8 +1281,8 @@ function PairComparisonPanel({
             Head-to-head enthusiast verdict
           </h2>
           <p className="mt-3 max-w-3xl text-sm leading-6 text-zinc-600">
-            Scores are based on the saved specs and wearability notes for these
-            two watches, then weighted against enthusiast priorities like fit,
+            Built from the saved specs and wearability notes for these two
+            watches, then weighed against enthusiast priorities like fit,
             movement quality, practicality, finishing, value, and collector
             appeal.
           </p>

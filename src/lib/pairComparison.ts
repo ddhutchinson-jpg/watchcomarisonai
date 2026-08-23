@@ -31,7 +31,7 @@ export type PairComparisonResult = PairComparison & {
   updated_at?: string;
 };
 
-const COMPARISON_PROMPT_VERSION = "2026-05-24-recommended-for-watch-labels";
+const COMPARISON_PROMPT_VERSION = "2026-08-23-no-public-scorecards";
 const COMPARISON_OUTPUT_TOKEN_LIMITS = [5000, 8000] as const;
 
 const comparisonSchema = {
@@ -180,7 +180,7 @@ Required response shape:
 - fit_comparison: Compare case diameter, thickness, lug-to-lug, weight, wrist presence, comfort, and suitability for different wrist sizes. Include the pre-existing wearability summaries when present. End with "Winner:" or "Winner: Tie".
 - daily_wear_comparison: Compare dial/legibility, lume, materials, finishing, bracelet/strap, clasp, water resistance, complications, travel/sports suitability, and everyday practicality. End with "Winner:" or "Winner: Tie".
 - value_comparison: Compare MSRP/value, brand and heritage signals available in the data, ownership practicality, durability, maintenance expectations, and collector appeal. Do not discuss current market price or resale unless listed. End with "Winner:" or "Winner: Tie".
-- enthusiast_take: Include concise pros and cons for each watch, a category scorecard out of 10 for Movement, Case & Wearability, Dial & Legibility, Materials & Finishing, Features & Functionality, Brand & Heritage, Value Proposition, and Ownership Experience, then give a final verdict that weighs the categories collectively rather than simply counting wins.
+- enthusiast_take: Give a concise final verdict that weighs movement, case and wearability, dial and legibility, materials and finishing, functionality, brand context, value, and ownership experience collectively rather than simply counting wins. Do not include numeric scores, a scorecard, ratings, or points.
 - recommended_for: 2-5 short recommendations that distinguish enthusiast priorities, such as technical superiority, craftsmanship, design, daily practicality, value, collector interest, or wrist fit. Each item must begin with the recommended watch name, or "Either watch:" if the recommendation applies to both.
 - confidence_score: Set 0.25-0.45 when many important specs are missing, 0.45-0.7 when the comparison is partially supported, and 0.7-0.95 only when the data is rich enough for a strong recommendation.
 
