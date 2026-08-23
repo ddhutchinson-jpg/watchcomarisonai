@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { CompareLaunchLink } from "./compare/CompareLaunchLink";
 import type { Watch } from "./compare/CompareClient";
 import {
   normalizeNamePart,
@@ -592,12 +593,12 @@ export function HomeConcierge({ watches }: { watches: Watch[] }) {
             ))}
           </div>
           {comparePair.length === 2 ? (
-            <Link
+            <CompareLaunchLink
               href={`/compare/${watchSlug(comparePair[0])}/vs/${watchSlug(comparePair[1])}`}
               className="mt-5 grid min-h-12 place-items-center rounded-md bg-red-600 px-4 text-center text-xs font-extrabold uppercase tracking-[0.1em] text-white transition hover:bg-white hover:text-black sm:text-sm sm:tracking-[0.14em]"
             >
               Open 1v1 comparison
-            </Link>
+            </CompareLaunchLink>
           ) : (
             <button
               type="button"

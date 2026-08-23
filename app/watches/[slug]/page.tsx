@@ -10,6 +10,7 @@ import {
 } from "@/src/lib/watchRoutes";
 import { recordWatchViewEvent } from "@/src/lib/watchMetrics";
 import { BrandMark } from "@/app/BrandMark";
+import { CompareLaunchLink } from "@/app/compare/CompareLaunchLink";
 
 export const dynamic = "force-dynamic";
 
@@ -461,16 +462,16 @@ export default async function WatchDetailPage({ params }: PageProps) {
             </h2>
             <div className="grid gap-3 md:grid-cols-2">
               {comparisonSuggestions.map((candidate) => (
-                <Link
+                <CompareLaunchLink
                   key={watchSlug(candidate)}
                   href={`/compare/${watchSlug(watch)}/vs/${watchSlug(candidate)}`}
-                  aria-label={`Open 1v1 comparison for ${name} vs ${watchDisplayName(candidate)}`}
+                  ariaLabel={`Open 1v1 comparison for ${name} vs ${watchDisplayName(candidate)}`}
                   className="rounded-lg border border-zinc-200 bg-zinc-50 p-4 transition hover:border-red-600/40 hover:bg-red-50"
                 >
                   <p className="text-sm font-bold leading-6 text-black">
                     {name} vs {watchDisplayName(candidate)}
                   </p>
-                </Link>
+                </CompareLaunchLink>
               ))}
             </div>
           </section>

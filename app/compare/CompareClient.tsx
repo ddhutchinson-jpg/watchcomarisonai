@@ -7,6 +7,7 @@ import {
   watchDisplayName,
   watchSlug,
 } from "@/src/lib/watchRoutes";
+import { CompareLaunchLink } from "./CompareLaunchLink";
 
 export type Watch = {
   id?: string | number | null;
@@ -1400,12 +1401,12 @@ function PopularComparisons({
                 >
                   Load pair
                 </button>
-                <Link
+                <CompareLaunchLink
                   href={pairPath(watchA, watchB)}
                   className="border border-zinc-200 px-3 py-2 text-xs font-bold uppercase tracking-[0.14em] text-zinc-600 transition hover:border-red-600/40 hover:text-red-600 focus:border-red-600/40 focus:text-red-600 focus:outline-none"
                 >
                   1v1 page
-                </Link>
+                </CompareLaunchLink>
               </div>
             </div>
           );
@@ -1501,12 +1502,12 @@ export function CompareClient({
               </p>
             </div>
             {watchA && watchB ? (
-              <Link
+              <CompareLaunchLink
                 href={pairPath(watchA, watchB)}
                 className="border border-zinc-200 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-zinc-600 transition hover:border-red-600/40 hover:text-red-600"
               >
                 Open 1v1 Page
-              </Link>
+              </CompareLaunchLink>
             ) : null}
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
