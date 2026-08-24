@@ -9,8 +9,8 @@ export default async function Home() {
   const { watches, error } = await loadWatches();
 
   return (
-    <main className="min-h-screen bg-[#fbfbfa] px-4 py-5 text-black sm:px-6 lg:px-10">
-      <section className="mx-auto max-w-7xl overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-[0_26px_90px_rgba(0,0,0,0.09)]">
+    <main className="min-h-screen bg-[#fbfbfa] px-0 py-0 text-black sm:px-6 sm:py-5 lg:px-10">
+      <section className="mx-auto max-w-7xl overflow-hidden border border-zinc-200 bg-white shadow-[0_26px_90px_rgba(0,0,0,0.09)] sm:rounded-xl">
         <nav className="flex flex-wrap items-center justify-between gap-4 border-b border-zinc-200 bg-white px-5 py-4 sm:px-8">
           <BrandMark />
           <div className="flex flex-wrap items-center gap-2">
@@ -29,7 +29,7 @@ export default async function Home() {
           </div>
         </nav>
 
-        <div className="px-5 py-8 sm:px-8 lg:px-10 lg:py-10">
+        <div className="px-4 py-5 sm:px-8 sm:py-8 lg:px-10 lg:py-10">
           {error ? (
             <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-sm leading-6 text-red-900">
               Unable to load watches: {error}

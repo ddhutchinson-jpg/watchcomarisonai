@@ -371,174 +371,187 @@ export function HomeConcierge({ watches }: { watches: Watch[] }) {
     }
   }
 
+  const resultsHeading = submittedQuery
+    ? "Matches for your search"
+    : "Popular watches";
+  const compareHref =
+    comparePair.length === 2
+      ? `/compare/${watchSlug(comparePair[0])}/vs/${watchSlug(comparePair[1])}`
+      : null;
+  const quickPrompts = defaultPrompts.slice(0, 6);
+
   return (
     <section className="grid gap-8">
-      <div className="grid gap-6 rounded-lg border-2 border-black bg-white p-4 shadow-[0_24px_70px_rgba(0,0,0,0.12)] sm:p-6 lg:p-7">
-        <form
-          className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_9.5rem]"
-          onSubmit={(event) => {
-            event.preventDefault();
-            void runConciergeSearch();
-          }}
-        >
-          <label className="sr-only" htmlFor="home-ai-search">
-            AI powered watch search
-          </label>
-          <input
-            id="home-ai-search"
-            value={query}
-            onChange={(event) => {
-              setQuery(event.target.value);
-              setActiveCategory(null);
-              setAiCategoryLabels([]);
-              setAiSummary(null);
-              setSearchError(null);
+      <div className="grid gap-6 lg:hidden">
+        <div className="grid gap-4 rounded-lg border border-zinc-200 bg-white p-4 shadow-[0_18px_46px_rgba(0,0,0,0.08)]">
+          <div>
+            <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-red-600">
+              Concierge search
+            </p>
+            <h1 className="mt-2 text-2xl font-extrabold leading-tight text-black">
+              Find the watch that fits your wrist, budget, and taste.
+            </h1>
+          </div>
+
+          <form
+            className="grid gap-3"
+            onSubmit={(event) => {
+              event.preventDefault();
+              void runConciergeSearch();
             }}
-            className="min-h-14 rounded-md border border-zinc-200 bg-zinc-50 px-4 text-base font-semibold text-black outline-none transition placeholder:text-zinc-500 focus:border-red-600 focus:bg-white focus:ring-4 focus:ring-red-600/10 sm:min-h-20 sm:px-5 sm:text-xl"
-            placeholder="Search in natural language: budget, style, wrist fit, occasion, specs, or watches you are considering..."
-          />
-          <button
-            type="submit"
-            disabled={isSearching}
-            className="min-h-11 w-full self-center rounded-md bg-red-600 px-4 py-3 text-xs font-extrabold uppercase tracking-[0.1em] text-white transition hover:bg-black disabled:cursor-wait disabled:bg-zinc-300 sm:tracking-[0.12em]"
           >
-            {isSearching ? "Searching" : "Ask Concierge"}
-          </button>
-        </form>
-
-        {aiSummary || searchError ? (
-          <p
-            className={`rounded-md px-3 py-2 text-sm font-semibold ${
-              searchError
-                ? "bg-red-50 text-red-800"
-                : "bg-zinc-100 text-zinc-700"
-            }`}
-          >
-            {searchError
-              ? "AI search is unavailable, so local matching is being shown."
-              : aiSummary}
-          </p>
-        ) : null}
-
-        <div className="grid gap-3">
-          <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-red-600">
-            {isLoadingCategories
-              ? "Generating categories"
-              : "Categories generated from this search"}
-          </p>
-          <div className="flex flex-wrap gap-2">
-          {categories.map((category) => (
+            <label className="sr-only" htmlFor="mobile-home-ai-search">
+              Concierge watch search
+            </label>
+            <textarea
+              id="mobile-home-ai-search"
+              value={query}
+              onChange={(event) => {
+                setQuery(event.target.value);
+                setActiveCategory(null);
+                setAiCategoryLabels([]);
+                setAiSummary(null);
+                setSearchError(null);
+              }}
+              rows={3}
+              className="min-h-28 resize-none rounded-md border border-zinc-200 bg-zinc-50 px-4 py-3 text-base font-semibold leading-6 text-black outline-none transition placeholder:text-zinc-500 focus:border-red-600 focus:bg-white focus:ring-4 focus:ring-red-600/10"
+              placeholder="Describe what you want: under $5k, daily diver, small wrist, GMT, dress watch..."
+            />
             <button
-              key={category.label}
-              type="button"
-              aria-pressed={activeCategory === category.label}
-              onClick={() =>
-                setActiveCategory((current) =>
-                  current === category.label ? null : category.label,
-                )
-              }
-              className="rounded-md border border-zinc-200 bg-white px-3 py-2 text-xs font-bold text-zinc-800 transition hover:border-red-600 hover:text-red-700 aria-pressed:border-red-600 aria-pressed:bg-red-600 aria-pressed:text-white"
+              type="submit"
+              disabled={isSearching}
+              className="min-h-12 w-full rounded-md bg-red-600 px-4 py-3 text-sm font-extrabold uppercase tracking-[0.12em] text-white transition hover:bg-black disabled:cursor-wait disabled:bg-zinc-300"
             >
-              {category.label}
+              {isSearching ? "Searching" : "Find watches"}
             </button>
-          ))}
+          </form>
+
+          {aiSummary || searchError ? (
+            <p
+              className={`rounded-md px-3 py-2 text-sm font-semibold ${
+                searchError
+                  ? "bg-red-50 text-red-800"
+                  : "bg-zinc-100 text-zinc-700"
+              }`}
+            >
+              {searchError
+                ? "AI search is unavailable, so local matching is being shown."
+                : aiSummary}
+            </p>
+          ) : null}
+
+          <div className="grid gap-3">
+            <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-zinc-500">
+              {isLoadingCategories ? "Making smart filters" : "Tap a filter"}
+            </p>
+            <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
+              {categories.map((category) => (
+                <button
+                  key={category.label}
+                  type="button"
+                  aria-pressed={activeCategory === category.label}
+                  onClick={() =>
+                    setActiveCategory((current) =>
+                      current === category.label ? null : category.label,
+                    )
+                  }
+                  className="shrink-0 rounded-full border border-zinc-200 bg-white px-4 py-2 text-xs font-bold text-zinc-800 transition hover:border-red-600 hover:text-red-700 aria-pressed:border-red-600 aria-pressed:bg-red-600 aria-pressed:text-white"
+                >
+                  {category.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid gap-3 border-t border-zinc-200 pt-4">
+            <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-zinc-500">
+              Quick starts
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              {quickPrompts.map((prompt) => (
+                <button
+                  key={prompt}
+                  type="button"
+                  onClick={() => runPrompt(prompt)}
+                  className="min-h-12 rounded-md bg-zinc-100 px-3 py-2 text-left text-xs font-bold leading-5 text-zinc-700 transition hover:bg-zinc-200 hover:text-black"
+                >
+                  {prompt}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
-        <div className="grid gap-3 border-t border-zinc-200 pt-5">
-          <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-zinc-500">
-            Try a search
-          </p>
-          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-            {defaultPrompts.map((prompt) => (
-              <button
-                key={prompt}
-                type="button"
-                onClick={() => runPrompt(prompt)}
-                className="min-h-12 rounded-md bg-zinc-100 px-3 py-2 text-left text-xs font-bold leading-5 text-zinc-700 transition hover:bg-zinc-200 hover:text-black"
-              >
-                {prompt}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_18rem]">
-        <div className="order-2 lg:order-none">
-          <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+        <div className="pb-32">
+          <div className="mb-3 flex items-end justify-between gap-3">
             <div>
-              <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-red-600">
-                Concierge matches
+              <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-red-600">
+                Results
               </p>
-              <h2 className="mt-2 text-2xl font-extrabold text-black sm:text-3xl">
-                {submittedQuery
-                  ? "Watches surfaced from your criteria"
-                  : "Most popular watches right now"}
+              <h2 className="mt-1 text-xl font-extrabold text-black">
+                {resultsHeading}
               </h2>
             </div>
-            <span className="rounded-md border border-zinc-200 bg-white px-3 py-2 text-xs font-bold text-zinc-600">
-              {visibleWatches.length} shown
+            <span className="rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs font-bold text-zinc-600">
+              {visibleWatches.length}
             </span>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-3">
             {visibleWatches.map((watch, index) => {
               const imageUrl = watchImageUrl(watch);
-              const isInCompare = compareKeys.includes(watchKey(watch));
+              const key = watchKey(watch);
+              const isInCompare = compareKeys.includes(key);
               const isCompareFull = compareKeys.length >= 2;
+
               return (
                 <article
-                  key={`${watchSlug(watch)}-${index}`}
-                  className="flex h-full flex-col overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-[0_16px_42px_rgba(0,0,0,0.07)]"
+                  key={`${watchSlug(watch)}-mobile-${index}`}
+                  className={`grid grid-cols-[6.5rem_minmax(0,1fr)] gap-3 rounded-lg border bg-white p-3 shadow-[0_12px_30px_rgba(0,0,0,0.06)] ${
+                    isInCompare ? "border-red-600" : "border-zinc-200"
+                  }`}
                 >
                   <Link
                     href={`/watches/${watchSlug(watch)}`}
-                    className="block"
                     aria-label={`View ${watchDisplayName(watch)}`}
+                    className="grid min-h-32 rounded-md bg-zinc-100 bg-contain bg-center bg-no-repeat"
+                    style={imageUrl ? { backgroundImage: `url("${imageUrl}")` } : undefined}
                   >
-                    <div
-                      className="grid min-h-52 place-items-center bg-zinc-100 bg-contain bg-center bg-no-repeat"
-                      style={imageUrl ? { backgroundImage: `url("${imageUrl}")` } : undefined}
-                    >
-                      {!imageUrl ? (
-                        <span className="text-sm font-semibold text-zinc-500">
-                          Image not listed
-                        </span>
-                      ) : null}
-                    </div>
+                    {!imageUrl ? (
+                      <span className="place-self-center px-2 text-center text-xs font-semibold text-zinc-500">
+                        Image not listed
+                      </span>
+                    ) : null}
                   </Link>
-                  <div className="flex flex-1 flex-col gap-3 p-4">
-                    <div>
-                      <p className="text-[0.68rem] font-extrabold uppercase tracking-[0.16em] text-red-600">
-                        {watchBrand(watch)}
-                      </p>
-                      <h3 className="mt-1 text-lg font-extrabold leading-tight text-black">
-                        {watchCollection(watch) ?? watchModel(watch) ?? watchDisplayName(watch)}
-                      </h3>
-                      <p className="mt-2 text-xs font-semibold uppercase tracking-[0.12em] text-zinc-500">
-                        {watch.reference_number || "Reference not listed"}
-                      </p>
-                    </div>
-                    <p className="text-sm leading-6 text-zinc-600">
+                  <div className="flex min-w-0 flex-col">
+                    <p className="text-[0.68rem] font-extrabold uppercase tracking-[0.14em] text-red-600">
+                      {watchBrand(watch)}
+                    </p>
+                    <h3 className="mt-1 line-clamp-2 text-base font-extrabold leading-5 text-black">
+                      {watchCollection(watch) ?? watchModel(watch) ?? watchDisplayName(watch)}
+                    </h3>
+                    <p className="mt-1 truncate text-xs font-semibold uppercase tracking-[0.1em] text-zinc-500">
+                      {watch.reference_number || "Reference not listed"}
+                    </p>
+                    <p className="mt-2 text-xs font-semibold leading-5 text-zinc-600">
                       {[watch.case_size_mm ? `${watch.case_size_mm}mm` : null, watch.movement_type, watchMsrp(watch)]
                         .filter(Boolean)
-                        .join(" / ") || "Specs available on detail page"}
+                        .join(" / ") || "Specs on detail page"}
                     </p>
-                    <div className="mt-auto flex items-center justify-between gap-3 border-t border-zinc-100 pt-3 text-sm">
+                    <div className="mt-auto grid grid-cols-2 gap-2 pt-3">
                       <Link
                         href={`/watches/${watchSlug(watch)}`}
-                        className="font-bold text-black transition hover:text-red-600"
+                        className="grid min-h-10 place-items-center rounded-md border border-zinc-200 text-xs font-bold text-black transition hover:border-red-600 hover:text-red-600"
                       >
-                        View details
+                        Details
                       </Link>
                       <button
                         type="button"
                         disabled={isInCompare || isCompareFull}
                         onClick={() => addToCompare(watch)}
-                        className="rounded-md bg-red-50 px-2 py-1 text-xs font-bold text-red-700 transition hover:bg-red-600 hover:text-white disabled:cursor-not-allowed disabled:bg-zinc-100 disabled:text-zinc-400"
+                        className="grid min-h-10 place-items-center rounded-md bg-red-50 px-2 text-xs font-bold text-red-700 transition hover:bg-red-600 hover:text-white disabled:cursor-not-allowed disabled:bg-zinc-100 disabled:text-zinc-400"
                       >
-                        {isInCompare ? "In compare" : "Add to compare"}
+                        {isInCompare ? "Selected" : "Compare"}
                       </button>
                     </div>
                   </div>
@@ -548,67 +561,307 @@ export function HomeConcierge({ watches }: { watches: Watch[] }) {
           </div>
         </div>
 
-        <aside className="order-1 h-fit rounded-lg bg-black p-4 text-white shadow-[0_24px_70px_rgba(0,0,0,0.18)] sm:p-5 lg:order-none lg:mt-7">
-          <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-red-500">
-            Compare tray
-          </p>
-          <h2 className="mt-3 text-2xl font-extrabold leading-tight">
-            Ready for a 1v1
-          </h2>
-          <p className="mt-3 text-sm leading-6 text-zinc-300">
-            The homepage keeps discovery here. Users only leave when they open
-            a watch detail page or commit to a comparison.
-          </p>
-          <div className="mt-5 grid gap-2">
-            {comparePair.map((watch) => (
-              <div
-                key={watchSlug(watch)}
-                className="flex items-start justify-between gap-3 rounded-md border border-white/10 bg-white/10 px-3 py-3 text-sm font-bold"
-              >
-                <span>{watchDisplayName(watch)}</span>
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-zinc-200 bg-white/95 px-4 py-3 shadow-[0_-18px_50px_rgba(0,0,0,0.12)] backdrop-blur">
+          <div className="mx-auto grid max-w-xl gap-3">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-red-600">
+                  Compare
+                </p>
+                <p className="text-sm font-bold text-black">
+                  {comparePair.length}/2 selected
+                </p>
+              </div>
+              {compareKeys.length ? (
                 <button
                   type="button"
-                  onClick={() => removeFromCompare(watch)}
-                  className="grid h-7 w-7 shrink-0 place-items-center rounded-md text-zinc-400 transition hover:bg-white/10 hover:text-white"
-                  aria-label={`Remove ${watchDisplayName(watch)} from compare tray`}
+                  onClick={() => setCompareKeys([])}
+                  className="rounded-md border border-zinc-200 px-3 py-2 text-xs font-bold text-zinc-600"
                 >
-                  <svg
-                    aria-hidden="true"
-                    className="h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M3 6h18" />
-                    <path d="M8 6V4h8v2" />
-                    <path d="M19 6l-1 14H6L5 6" />
-                    <path d="M10 11v5" />
-                    <path d="M14 11v5" />
-                  </svg>
+                  Clear
                 </button>
+              ) : null}
+            </div>
+
+            {comparePair.length ? (
+              <div className="grid gap-2">
+                {comparePair.map((watch) => (
+                  <div
+                    key={`${watchSlug(watch)}-mobile-bar`}
+                    className="flex items-center justify-between gap-2 rounded-md bg-zinc-100 px-3 py-2 text-xs font-bold text-black"
+                  >
+                    <span className="truncate">{watchDisplayName(watch)}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeFromCompare(watch)}
+                      className="grid size-7 shrink-0 place-items-center rounded-md text-zinc-500 transition hover:bg-white hover:text-red-600"
+                      aria-label={`Remove ${watchDisplayName(watch)} from compare`}
+                    >
+                      x
+                    </button>
+                  </div>
+                ))}
               </div>
-            ))}
+            ) : null}
+
+            {compareHref ? (
+              <CompareLaunchLink
+                href={compareHref}
+                className="grid min-h-12 place-items-center rounded-md bg-red-600 px-4 text-center text-xs font-extrabold uppercase tracking-[0.12em] text-white transition hover:bg-black"
+              >
+                Open 1v1 comparison
+              </CompareLaunchLink>
+            ) : (
+              <button
+                type="button"
+                disabled
+                className="grid min-h-12 w-full cursor-not-allowed place-items-center rounded-md bg-zinc-200 px-4 text-center text-xs font-extrabold uppercase tracking-[0.12em] text-zinc-500"
+              >
+                Open 1v1 comparison
+              </button>
+            )}
           </div>
-          {comparePair.length === 2 ? (
-            <CompareLaunchLink
-              href={`/compare/${watchSlug(comparePair[0])}/vs/${watchSlug(comparePair[1])}`}
-              className="mt-5 grid min-h-12 place-items-center rounded-md bg-red-600 px-4 text-center text-xs font-extrabold uppercase tracking-[0.1em] text-white transition hover:bg-white hover:text-black sm:text-sm sm:tracking-[0.14em]"
-            >
-              Open 1v1 comparison
-            </CompareLaunchLink>
-          ) : (
+        </div>
+      </div>
+
+      <div className="hidden gap-8 lg:grid">
+        <div className="grid gap-6 rounded-lg border-2 border-black bg-white p-7 shadow-[0_24px_70px_rgba(0,0,0,0.12)]">
+          <form
+            className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_9.5rem]"
+            onSubmit={(event) => {
+              event.preventDefault();
+              void runConciergeSearch();
+            }}
+          >
+            <label className="sr-only" htmlFor="home-ai-search">
+              AI powered watch search
+            </label>
+            <input
+              id="home-ai-search"
+              value={query}
+              onChange={(event) => {
+                setQuery(event.target.value);
+                setActiveCategory(null);
+                setAiCategoryLabels([]);
+                setAiSummary(null);
+                setSearchError(null);
+              }}
+              className="min-h-20 rounded-md border border-zinc-200 bg-zinc-50 px-5 text-xl font-semibold text-black outline-none transition placeholder:text-zinc-500 focus:border-red-600 focus:bg-white focus:ring-4 focus:ring-red-600/10"
+              placeholder="Search in natural language: budget, style, wrist fit, occasion, specs, or watches you are considering..."
+            />
             <button
-              type="button"
-              disabled
-              className="mt-5 grid min-h-12 w-full cursor-not-allowed place-items-center rounded-md bg-zinc-700 px-4 text-center text-xs font-extrabold uppercase tracking-[0.1em] text-zinc-400 sm:text-sm sm:tracking-[0.14em]"
+              type="submit"
+              disabled={isSearching}
+              className="min-h-11 w-full self-center rounded-md bg-red-600 px-4 py-3 text-xs font-extrabold uppercase tracking-[0.12em] text-white transition hover:bg-black disabled:cursor-wait disabled:bg-zinc-300"
             >
-              Open 1v1 comparison
+              {isSearching ? "Searching" : "Ask Concierge"}
             </button>
-          )}
-        </aside>
+          </form>
+
+          {aiSummary || searchError ? (
+            <p
+              className={`rounded-md px-3 py-2 text-sm font-semibold ${
+                searchError
+                  ? "bg-red-50 text-red-800"
+                  : "bg-zinc-100 text-zinc-700"
+              }`}
+            >
+              {searchError
+                ? "AI search is unavailable, so local matching is being shown."
+                : aiSummary}
+            </p>
+          ) : null}
+
+          <div className="grid gap-3">
+            <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-red-600">
+              {isLoadingCategories
+                ? "Generating categories"
+                : "Categories generated from this search"}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {categories.map((category) => (
+                <button
+                  key={category.label}
+                  type="button"
+                  aria-pressed={activeCategory === category.label}
+                  onClick={() =>
+                    setActiveCategory((current) =>
+                      current === category.label ? null : category.label,
+                    )
+                  }
+                  className="rounded-md border border-zinc-200 bg-white px-3 py-2 text-xs font-bold text-zinc-800 transition hover:border-red-600 hover:text-red-700 aria-pressed:border-red-600 aria-pressed:bg-red-600 aria-pressed:text-white"
+                >
+                  {category.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid gap-3 border-t border-zinc-200 pt-5">
+            <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-zinc-500">
+              Try a search
+            </p>
+            <div className="grid gap-2 lg:grid-cols-4">
+              {defaultPrompts.map((prompt) => (
+                <button
+                  key={prompt}
+                  type="button"
+                  onClick={() => runPrompt(prompt)}
+                  className="min-h-12 rounded-md bg-zinc-100 px-3 py-2 text-left text-xs font-bold leading-5 text-zinc-700 transition hover:bg-zinc-200 hover:text-black"
+                >
+                  {prompt}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_18rem]">
+          <div>
+            <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-red-600">
+                  Concierge matches
+                </p>
+                <h2 className="mt-2 text-3xl font-extrabold text-black">
+                  {submittedQuery
+                    ? "Watches surfaced from your criteria"
+                    : "Most popular watches right now"}
+                </h2>
+              </div>
+              <span className="rounded-md border border-zinc-200 bg-white px-3 py-2 text-xs font-bold text-zinc-600">
+                {visibleWatches.length} shown
+              </span>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {visibleWatches.map((watch, index) => {
+                const imageUrl = watchImageUrl(watch);
+                const isInCompare = compareKeys.includes(watchKey(watch));
+                const isCompareFull = compareKeys.length >= 2;
+                return (
+                  <article
+                    key={`${watchSlug(watch)}-${index}`}
+                    className="flex h-full flex-col overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-[0_16px_42px_rgba(0,0,0,0.07)]"
+                  >
+                    <Link
+                      href={`/watches/${watchSlug(watch)}`}
+                      className="block"
+                      aria-label={`View ${watchDisplayName(watch)}`}
+                    >
+                      <div
+                        className="grid min-h-52 place-items-center bg-zinc-100 bg-contain bg-center bg-no-repeat"
+                        style={imageUrl ? { backgroundImage: `url("${imageUrl}")` } : undefined}
+                      >
+                        {!imageUrl ? (
+                          <span className="text-sm font-semibold text-zinc-500">
+                            Image not listed
+                          </span>
+                        ) : null}
+                      </div>
+                    </Link>
+                    <div className="flex flex-1 flex-col gap-3 p-4">
+                      <div>
+                        <p className="text-[0.68rem] font-extrabold uppercase tracking-[0.16em] text-red-600">
+                          {watchBrand(watch)}
+                        </p>
+                        <h3 className="mt-1 text-lg font-extrabold leading-tight text-black">
+                          {watchCollection(watch) ?? watchModel(watch) ?? watchDisplayName(watch)}
+                        </h3>
+                        <p className="mt-2 text-xs font-semibold uppercase tracking-[0.12em] text-zinc-500">
+                          {watch.reference_number || "Reference not listed"}
+                        </p>
+                      </div>
+                      <p className="text-sm leading-6 text-zinc-600">
+                        {[watch.case_size_mm ? `${watch.case_size_mm}mm` : null, watch.movement_type, watchMsrp(watch)]
+                          .filter(Boolean)
+                          .join(" / ") || "Specs available on detail page"}
+                      </p>
+                      <div className="mt-auto flex items-center justify-between gap-3 border-t border-zinc-100 pt-3 text-sm">
+                        <Link
+                          href={`/watches/${watchSlug(watch)}`}
+                          className="font-bold text-black transition hover:text-red-600"
+                        >
+                          View details
+                        </Link>
+                        <button
+                          type="button"
+                          disabled={isInCompare || isCompareFull}
+                          onClick={() => addToCompare(watch)}
+                          className="rounded-md bg-red-50 px-2 py-1 text-xs font-bold text-red-700 transition hover:bg-red-600 hover:text-white disabled:cursor-not-allowed disabled:bg-zinc-100 disabled:text-zinc-400"
+                        >
+                          {isInCompare ? "In compare" : "Add to compare"}
+                        </button>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+
+          <aside className="h-fit rounded-lg bg-black p-5 text-white shadow-[0_24px_70px_rgba(0,0,0,0.18)] lg:mt-7">
+            <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-red-500">
+              Compare tray
+            </p>
+            <h2 className="mt-3 text-2xl font-extrabold leading-tight">
+              Ready for a 1v1
+            </h2>
+            <p className="mt-3 text-sm leading-6 text-zinc-300">
+              The homepage keeps discovery here. Users only leave when they open
+              a watch detail page or commit to a comparison.
+            </p>
+            <div className="mt-5 grid gap-2">
+              {comparePair.map((watch) => (
+                <div
+                  key={watchSlug(watch)}
+                  className="flex items-start justify-between gap-3 rounded-md border border-white/10 bg-white/10 px-3 py-3 text-sm font-bold"
+                >
+                  <span>{watchDisplayName(watch)}</span>
+                  <button
+                    type="button"
+                    onClick={() => removeFromCompare(watch)}
+                    className="grid h-7 w-7 shrink-0 place-items-center rounded-md text-zinc-400 transition hover:bg-white/10 hover:text-white"
+                    aria-label={`Remove ${watchDisplayName(watch)} from compare tray`}
+                  >
+                    <svg
+                      aria-hidden="true"
+                      className="h-4 w-4"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M3 6h18" />
+                      <path d="M8 6V4h8v2" />
+                      <path d="M19 6l-1 14H6L5 6" />
+                      <path d="M10 11v5" />
+                      <path d="M14 11v5" />
+                    </svg>
+                  </button>
+                </div>
+              ))}
+            </div>
+            {compareHref ? (
+              <CompareLaunchLink
+                href={compareHref}
+                className="mt-5 grid min-h-12 place-items-center rounded-md bg-red-600 px-4 text-center text-sm font-extrabold uppercase tracking-[0.14em] text-white transition hover:bg-white hover:text-black"
+              >
+                Open 1v1 comparison
+              </CompareLaunchLink>
+            ) : (
+              <button
+                type="button"
+                disabled
+                className="mt-5 grid min-h-12 w-full cursor-not-allowed place-items-center rounded-md bg-zinc-700 px-4 text-center text-sm font-extrabold uppercase tracking-[0.14em] text-zinc-400"
+              >
+                Open 1v1 comparison
+              </button>
+            )}
+          </aside>
+        </div>
       </div>
     </section>
   );
