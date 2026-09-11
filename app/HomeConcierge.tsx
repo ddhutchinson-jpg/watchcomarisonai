@@ -310,6 +310,7 @@ export function HomeConcierge({ watches }: { watches: Watch[] }) {
     setAiCategoryLabels([]);
     setAiSummary(null);
     setSearchError(null);
+    void runConciergeSearch(nextQuery);
   }
 
   function addToCompare(watch: Watch) {
@@ -329,8 +330,8 @@ export function HomeConcierge({ watches }: { watches: Watch[] }) {
     setCompareKeys((current) => current.filter((item) => item !== key));
   }
 
-  async function runConciergeSearch() {
-    const nextQuery = query.trim();
+  async function runConciergeSearch(queryOverride?: string) {
+    const nextQuery = (queryOverride ?? query).trim();
 
     if (!nextQuery || isSearching) {
       return;
@@ -472,8 +473,9 @@ export function HomeConcierge({ watches }: { watches: Watch[] }) {
                 <button
                   key={prompt}
                   type="button"
+                  disabled={isSearching}
                   onClick={() => runPrompt(prompt)}
-                  className="min-h-12 rounded-md bg-zinc-100 px-3 py-2 text-left text-xs font-bold leading-5 text-zinc-700 transition hover:bg-zinc-200 hover:text-black"
+                  className="min-h-12 rounded-md bg-zinc-100 px-3 py-2 text-left text-xs font-bold leading-5 text-zinc-700 transition hover:bg-zinc-200 hover:text-black disabled:cursor-wait disabled:text-zinc-400"
                 >
                   {prompt}
                 </button>
@@ -706,8 +708,9 @@ export function HomeConcierge({ watches }: { watches: Watch[] }) {
                 <button
                   key={prompt}
                   type="button"
+                  disabled={isSearching}
                   onClick={() => runPrompt(prompt)}
-                  className="min-h-12 rounded-md bg-zinc-100 px-3 py-2 text-left text-xs font-bold leading-5 text-zinc-700 transition hover:bg-zinc-200 hover:text-black"
+                  className="min-h-12 rounded-md bg-zinc-100 px-3 py-2 text-left text-xs font-bold leading-5 text-zinc-700 transition hover:bg-zinc-200 hover:text-black disabled:cursor-wait disabled:text-zinc-400"
                 >
                   {prompt}
                 </button>
