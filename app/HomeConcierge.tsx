@@ -398,6 +398,35 @@ export function HomeConcierge({ watches }: { watches: Watch[] }) {
 
   return (
     <section className="grid gap-8">
+      {isSearching ? (
+        <div
+          className="fixed inset-0 z-[70] grid place-items-center bg-[#fbfbfa] px-5 text-center text-black lg:hidden"
+          role="status"
+          aria-live="polite"
+          aria-label="Searching watches"
+        >
+          <div className="mx-auto grid max-w-sm gap-5">
+            <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-red-600 text-xs font-extrabold uppercase tracking-[0.12em] text-white shadow-[0_18px_42px_rgba(216,25,43,0.28)]">
+              AI
+            </div>
+            <div>
+              <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-red-600">
+                Concierge search
+              </p>
+              <h2 className="mt-3 text-2xl font-extrabold leading-tight">
+                Finding deez watchez for you.
+              </h2>
+              <p className="mt-3 text-sm font-semibold leading-6 text-zinc-600">
+                Matching your request against specs, style, fit, and budget.
+              </p>
+            </div>
+            <div className="mx-auto h-2 w-full max-w-64 overflow-hidden rounded-full bg-zinc-100">
+              <div className="h-full w-1/2 animate-pulse rounded-full bg-red-600" />
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       <div className="grid gap-6 lg:hidden">
         <div className="grid gap-4 rounded-lg border border-zinc-200 bg-white p-4 shadow-[0_18px_46px_rgba(0,0,0,0.08)]">
           <div>
