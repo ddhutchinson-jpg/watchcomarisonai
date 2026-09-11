@@ -912,7 +912,7 @@ function ComparisonTable({
   return (
     <section className="mt-6 overflow-x-auto border border-zinc-200 bg-white shadow-aureate">
       <div className="min-w-[42rem] sm:min-w-0">
-      <div className="grid grid-cols-[6.5rem_1fr_1fr] border-b border-zinc-200 bg-zinc-50 sm:grid-cols-[12rem_1fr_1fr]">
+      <div className="hidden grid-cols-[6.5rem_1fr_1fr] border-b border-zinc-200 bg-zinc-50 sm:grid sm:grid-cols-[12rem_1fr_1fr]">
         <div className="px-3 py-4 sm:px-5">
           <p className="text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-zinc-600">
             Compared
