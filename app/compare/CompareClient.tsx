@@ -940,6 +940,98 @@ function ComparisonTable({
   );
 }
 
+function normalizeRecommendationText(value: string | null | undefined) {
+  return normalizeNamePart(value).toLowerCase();
+}
+
+function recommendationMatchesWatch(item: string, watch: Watch | null) {
+  if (!watch) {
+    return false;
+  }
+
+  const itemText = normalizeRecommendationText(item);
+  const name = normalizeRecommendationText(watchName(watch));
+  const reference = normalizeRecommendationText(watch.reference_number);
+  const brand = normalizeRecommendationText(watchBrand(watch));
+  const model = normalizeRecommendationText(watchModel(watch));
+
+  return Boolean(
+    (name && (itemText.startsWith(name) || itemText.includes(name))) ||
+      (reference && itemText.includes(reference)) ||
+      (brand && model && itemText.includes(brand) && itemText.includes(model)),
+  );
+}
+
+function recommendationCopy(item: string) {
+  const separatorIndex = item.indexOf(":");
+  const copy = separatorIndex === -1 ? item : item.slice(separatorIndex + 1);
+  const trimmed = copy.trim();
+
+  if (!trimmed) {
+    return "Best fit when its strengths match the buyer's priorities.";
+  }
+
+  return trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
+}
+
+function verdictHighlightForWatch(
+  comparison: PairComparisonResult,
+  watch: Watch | null,
+) {
+  const item = comparison.recommended_for?.find((recommendation) =>
+    recommendationMatchesWatch(recommendation, watch),
+  );
+
+  if (item) {
+    return recommendationCopy(item);
+  }
+
+  return "Wins for buyers who prefer its overall mix of specs, fit, ownership appeal, and value.";
+}
+
+function VerdictCards({
+  comparison,
+  watchA,
+  watchB,
+}: {
+  comparison: PairComparisonResult;
+  watchA: Watch | null;
+  watchB: Watch | null;
+}) {
+  const cards = [
+    {
+      label: "Where it wins",
+      name: watchA ? watchName(watchA) : "First watch",
+      highlight: verdictHighlightForWatch(comparison, watchA),
+      border: "border-red-600/35",
+    },
+    {
+      label: "Where it wins",
+      name: watchB ? watchName(watchB) : "Second watch",
+      highlight: verdictHighlightForWatch(comparison, watchB),
+      border: "border-cognac/45",
+    },
+  ];
+
+  return (
+    <div className="grid gap-3 sm:grid-cols-2">
+      {cards.map((card) => (
+        <article key={card.name} className={`border ${card.border} bg-zinc-50 p-4`}>
+          <p className="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-red-600/80">
+            {card.label}
+          </p>
+          <h3 className="mt-2 text-base font-semibold leading-6 text-black">
+            {card.name}
+          </h3>
+          <p className="mt-3 text-sm leading-6 text-zinc-600">
+            {card.highlight}
+          </p>
+        </article>
+      ))}
+    </div>
+  );
+}
+
 function PairComparisonPanel({
   watchA,
   watchB,
@@ -1068,6 +1160,11 @@ function PairComparisonPanel({
 
       {comparison ? (
         <div className="mt-6 grid gap-4 border-t border-zinc-200 pt-5">
+          <VerdictCards
+            comparison={comparison}
+            watchA={watchA}
+            watchB={watchB}
+          />
           <div className="grid gap-px bg-zinc-100 md:grid-cols-2">
             {[
               ["Movement", comparison.movement_comparison],
