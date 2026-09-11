@@ -33,6 +33,8 @@ const defaultPrompts = [
   "Chronograph with strong heritage",
 ];
 
+const watchResultLimit = 9;
+
 function watchBrand(watch: Watch) {
   return watch.brand_name ?? watch.brand ?? "Unknown";
 }
@@ -240,14 +242,14 @@ export function HomeConcierge({ watches }: { watches: Watch[] }) {
     if (aiOrderedWatches.length) {
       return aiOrderedWatches
         .filter((watch) => (activeMatcher ? activeMatcher(watch) : true))
-        .slice(0, 6);
+        .slice(0, watchResultLimit);
     }
 
     const matches = watches
       .filter((watch) => queryMatchesWatch(watch, submittedQuery))
       .filter((watch) => (activeMatcher ? activeMatcher(watch) : true));
 
-    return (matches.length ? matches : watches).slice(0, 6);
+    return (matches.length ? matches : watches).slice(0, watchResultLimit);
   }, [activeMatcher, aiWatchKeys, submittedQuery, watches]);
   const comparePair = useMemo(
     () =>
@@ -369,7 +371,7 @@ export function HomeConcierge({ watches }: { watches: Watch[] }) {
 
       setSubmittedQuery(nextQuery);
       setAiCategoryLabels(payload.categories?.filter(Boolean).slice(0, 6) ?? []);
-      setAiWatchKeys(payload.watchIds?.filter(Boolean).slice(0, 6) ?? []);
+      setAiWatchKeys(payload.watchIds?.filter(Boolean).slice(0, watchResultLimit) ?? []);
       setAiSummary(payload.summary ?? null);
     } catch (error) {
       setSubmittedQuery(nextQuery);

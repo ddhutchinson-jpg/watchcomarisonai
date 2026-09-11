@@ -46,6 +46,8 @@ type ConciergeCategoryResult = {
   categories: string[];
 };
 
+const watchResultLimit = 9;
+
 const conciergeSearchSchema = {
   type: "object",
   additionalProperties: false,
@@ -61,7 +63,7 @@ const conciergeSearchSchema = {
       type: "array",
       items: { type: "string" },
       minItems: 1,
-      maxItems: 6,
+      maxItems: watchResultLimit,
     },
     summary: { type: "string" },
   },
@@ -466,7 +468,7 @@ function fallbackSearchResult(
         textValue(left.watch.brand_name).localeCompare(textValue(right.watch.brand_name))
       );
     })
-    .slice(0, 6);
+    .slice(0, watchResultLimit);
 
   return {
     categories: fallbackCategories(query),
@@ -685,7 +687,7 @@ export async function POST(request: Request) {
 
     const resultWatchIds = result.watch_ids
       .filter((watchId) => allowedWatchIds.has(watchId))
-      .slice(0, 6);
+      .slice(0, watchResultLimit);
 
     await recordSearchResultEvents(query, resultWatchIds);
 
