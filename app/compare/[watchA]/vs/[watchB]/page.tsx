@@ -88,11 +88,11 @@ function WatchHeroCard({
         ) : null}
       </div>
       <div className="grid gap-3 p-3 sm:gap-4 sm:p-5">
-        <div className="min-h-20 sm:min-h-24">
-          <h2 className="text-sm font-extrabold leading-tight text-black sm:text-2xl">
+        <div className="grid h-24 content-start sm:min-h-24 sm:h-auto">
+          <h2 className="line-clamp-2 text-sm font-extrabold leading-tight text-black sm:line-clamp-none sm:text-2xl">
             {name}
           </h2>
-          <p className="mt-2 break-words text-[0.62rem] font-semibold uppercase tracking-[0.08em] text-zinc-500 sm:text-xs sm:tracking-[0.14em]">
+          <p className="mt-2 line-clamp-2 break-words text-[0.62rem] font-semibold uppercase tracking-[0.08em] text-zinc-500 sm:line-clamp-none sm:text-xs sm:tracking-[0.14em]">
             {watch.reference_number || "Reference not listed"}
           </p>
         </div>
