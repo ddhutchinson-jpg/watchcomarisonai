@@ -671,7 +671,7 @@ export default async function WatchDetailPage({ params }: PageProps) {
                   className="rounded-lg border border-zinc-200 bg-zinc-50 p-4 transition hover:border-red-600/40 hover:bg-red-50"
                 >
                   <p className="text-sm font-bold leading-6 text-black">
-                    {name} vs {watchDisplayName(candidate)}
+                    {watchDisplayName(candidate)}
                   </p>
                 </CompareLaunchLink>
               ))}
