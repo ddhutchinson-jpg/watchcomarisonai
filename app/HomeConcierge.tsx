@@ -423,7 +423,7 @@ export function HomeConcierge({ watches }: { watches: Watch[] }) {
               disabled={isSearching}
               className="min-h-12 w-full rounded-md bg-red-600 px-4 py-3 text-sm font-extrabold uppercase tracking-[0.12em] text-white transition hover:bg-black disabled:cursor-wait disabled:bg-zinc-300"
             >
-              {isSearching ? "Searching" : "Find watches"}
+              {isSearching ? "Searching" : "Find Watches"}
             </button>
           </form>
 
@@ -656,7 +656,7 @@ export function HomeConcierge({ watches }: { watches: Watch[] }) {
               disabled={isSearching}
               className="min-h-11 w-full self-center rounded-md bg-red-600 px-4 py-3 text-xs font-extrabold uppercase tracking-[0.12em] text-white transition hover:bg-black disabled:cursor-wait disabled:bg-zinc-300"
             >
-              {isSearching ? "Searching" : "Ask Concierge"}
+              {isSearching ? "Searching" : "Find Watches"}
             </button>
           </form>
 
