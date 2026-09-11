@@ -329,6 +329,7 @@ function structuredSpecProperties(watch: WatchDetailRow) {
 
 function suggestedComparisons(watch: WatchDetailRow, watches: WatchDetailRow[]) {
   const currentId = watchId(watch);
+  const currentBrand = textValue(watch.brand_name);
   const scoredCandidates = watches
     .filter((candidate) => watchId(candidate) !== currentId)
     .map((candidate) => ({
@@ -346,20 +347,39 @@ function suggestedComparisons(watch: WatchDetailRow, watches: WatchDetailRow[]) 
   const selectedIds = new Set<string>();
   const brandCounts = new Map<string, number>();
 
-  for (const { candidate } of scoredCandidates) {
+  function addCandidate(candidate: WatchDetailRow, maxPerBrand: number) {
+    const candidateId = watchId(candidate);
     const brand = textValue(candidate.brand_name);
     const currentCount = brandCounts.get(brand) ?? 0;
 
+    if (selectedIds.has(candidateId)) {
+      return false;
+    }
+
     if (brand && currentCount >= 2) {
-      continue;
+      return false;
+    }
+
+    if (brand && brand === currentBrand && currentCount >= maxPerBrand) {
+      return false;
     }
 
     selected.push(candidate);
-    selectedIds.add(watchId(candidate));
+    selectedIds.add(candidateId);
 
     if (brand) {
       brandCounts.set(brand, currentCount + 1);
     }
+
+    return true;
+  }
+
+  for (const { candidate } of scoredCandidates) {
+    if (textValue(candidate.brand_name) === currentBrand) {
+      continue;
+    }
+
+    addCandidate(candidate, 0);
 
     if (selected.length === 4) {
       return selected;
@@ -367,11 +387,7 @@ function suggestedComparisons(watch: WatchDetailRow, watches: WatchDetailRow[]) 
   }
 
   for (const { candidate } of scoredCandidates) {
-    if (selectedIds.has(watchId(candidate))) {
-      continue;
-    }
-
-    selected.push(candidate);
+    addCandidate(candidate, 1);
 
     if (selected.length === 4) {
       break;
