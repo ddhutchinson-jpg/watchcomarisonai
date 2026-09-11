@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { CompareLaunchLink } from "./compare/CompareLaunchLink";
 import type { Watch } from "./compare/CompareClient";
 import {
@@ -210,6 +210,7 @@ function queryMatchesWatch(watch: Watch, query: string) {
 }
 
 export function HomeConcierge({ watches }: { watches: Watch[] }) {
+  const mobileResultsRef = useRef<HTMLDivElement | null>(null);
   const [query, setQuery] = useState("");
   const [submittedQuery, setSubmittedQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
@@ -330,6 +331,19 @@ export function HomeConcierge({ watches }: { watches: Watch[] }) {
     setCompareKeys((current) => current.filter((item) => item !== key));
   }
 
+  function scrollToMobileResults() {
+    if (!window.matchMedia("(max-width: 1023px)").matches) {
+      return;
+    }
+
+    window.requestAnimationFrame(() => {
+      mobileResultsRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
+  }
+
   async function runConciergeSearch(queryOverride?: string) {
     const nextQuery = (queryOverride ?? query).trim();
 
@@ -369,6 +383,7 @@ export function HomeConcierge({ watches }: { watches: Watch[] }) {
       );
     } finally {
       setIsSearching(false);
+      scrollToMobileResults();
     }
   }
 
@@ -484,7 +499,7 @@ export function HomeConcierge({ watches }: { watches: Watch[] }) {
           </div>
         </div>
 
-        <div className="pb-32">
+        <div ref={mobileResultsRef} className="scroll-mt-3 pb-32">
           <div className="mb-3 flex items-end justify-between gap-3">
             <div>
               <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-red-600">
