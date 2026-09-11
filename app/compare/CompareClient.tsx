@@ -864,12 +864,25 @@ function SpecSection({
         type="button"
         onClick={() => setExpanded((current) => !current)}
         className="flex w-full items-center justify-between gap-4 bg-zinc-50 px-3 py-3 text-left sm:px-5 md:pointer-events-none"
+        aria-expanded={expanded}
       >
-        <h3 className="text-xs font-bold uppercase tracking-[0.24em] text-red-600">
+        <h3 className="text-xs font-bold uppercase tracking-[0.16em] text-red-600 sm:tracking-[0.24em]">
           {section.title}
         </h3>
-        <span className="text-xs font-bold uppercase tracking-[0.16em] text-zinc-600 md:hidden">
+        <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.12em] text-zinc-600 md:hidden">
           {expanded ? "Hide" : "Show"}
+          <svg
+            aria-hidden="true"
+            className={`h-4 w-4 transition-transform ${expanded ? "rotate-180" : ""}`}
+            fill="none"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+          >
+            <path d="m6 9 6 6 6-6" />
+          </svg>
         </span>
       </button>
       <div className={`${expanded ? "block" : "hidden"} md:block`}>
@@ -877,21 +890,21 @@ function SpecSection({
           {section.fields.map((field) => (
             <div
               key={field.key}
-              className={`grid grid-cols-[6.5rem_1fr_1fr] text-xs transition hover:bg-white sm:grid-cols-[12rem_1fr_1fr] sm:text-sm ${
+              className={`grid grid-cols-[5.25rem_minmax(0,1fr)_minmax(0,1fr)] text-xs transition hover:bg-white sm:grid-cols-[12rem_1fr_1fr] sm:text-sm ${
                 field.emphasis ? "bg-white/[0.018]" : ""
               }`}
             >
               <dt
-                className={`px-3 py-3 text-[0.68rem] font-semibold uppercase tracking-[0.1em] sm:px-5 sm:py-4 sm:text-xs sm:tracking-[0.14em] ${
+                className={`px-2 py-3 text-[0.6rem] font-semibold uppercase leading-4 tracking-[0.06em] sm:px-5 sm:py-4 sm:text-xs sm:tracking-[0.14em] ${
                   field.emphasis ? "text-black" : "text-zinc-600"
                 }`}
               >
                 {field.label}
               </dt>
-              <dd className="border-l border-zinc-200 px-3 py-3 font-medium leading-5 text-black sm:px-5 sm:py-4 sm:leading-6">
+              <dd className="min-w-0 break-words border-l border-zinc-200 px-2 py-3 font-medium leading-5 text-black sm:px-5 sm:py-4 sm:leading-6">
                 {display(fieldValue(watchA, field.key))}
               </dd>
-              <dd className="border-l border-zinc-200 px-3 py-3 font-medium leading-5 text-black sm:px-5 sm:py-4 sm:leading-6">
+              <dd className="min-w-0 break-words border-l border-zinc-200 px-2 py-3 font-medium leading-5 text-black sm:px-5 sm:py-4 sm:leading-6">
                 {display(fieldValue(watchB, field.key))}
               </dd>
             </div>
@@ -910,8 +923,8 @@ function ComparisonTable({
   watchB: Watch | null;
 }) {
   return (
-    <section className="mt-6 overflow-x-auto border border-zinc-200 bg-white shadow-aureate">
-      <div className="min-w-[42rem] sm:min-w-0">
+    <section className="mt-6 overflow-hidden border border-zinc-200 bg-white shadow-aureate">
+      <div>
       <div className="hidden grid-cols-[6.5rem_1fr_1fr] border-b border-zinc-200 bg-zinc-50 sm:grid sm:grid-cols-[12rem_1fr_1fr]">
         <div className="px-3 py-4 sm:px-5">
           <p className="text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-zinc-600">
