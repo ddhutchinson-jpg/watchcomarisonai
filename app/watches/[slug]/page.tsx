@@ -155,6 +155,158 @@ function watchId(watch: WatchDetailRow) {
   return String(watch.watch_id ?? watch.id ?? watchSlug(watch));
 }
 
+function textValue(value: unknown) {
+  return typeof value === "string" ? value.trim().toLowerCase() : "";
+}
+
+function searchableWatchText(watch: WatchDetailRow) {
+  return [
+    watch.brand_name,
+    watch.collection_name,
+    watch.model_name,
+    watch.reference_number,
+    watch.category,
+  ]
+    .map(textValue)
+    .filter(Boolean)
+    .join(" ");
+}
+
+function numericValue(value: unknown) {
+  if (typeof value === "number") {
+    return Number.isFinite(value) ? value : null;
+  }
+
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const parsed = Number(value.replace(/[^0-9.-]/g, ""));
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function closenessScore(value: number | null, candidateValue: number | null, bands: Array<[number, number]>) {
+  if (value === null || candidateValue === null) {
+    return 0;
+  }
+
+  const difference = Math.abs(value - candidateValue);
+
+  for (const [limit, score] of bands) {
+    if (difference <= limit) {
+      return score;
+    }
+  }
+
+  return 0;
+}
+
+function msrpSimilarityScore(watch: WatchDetailRow, candidate: WatchDetailRow) {
+  const msrp = numericValue(watch.msrp);
+  const candidateMsrp = numericValue(candidate.msrp);
+
+  if (msrp === null || candidateMsrp === null) {
+    return 0;
+  }
+
+  const percentDifference = Math.abs(msrp - candidateMsrp) / Math.max(msrp, candidateMsrp);
+
+  if (percentDifference <= 0.1) return 24;
+  if (percentDifference <= 0.2) return 19;
+  if (percentDifference <= 0.35) return 13;
+  if (percentDifference <= 0.5) return 7;
+
+  return 0;
+}
+
+function caseSizeSimilarityScore(watch: WatchDetailRow, candidate: WatchDetailRow) {
+  return closenessScore(
+    numericValue(watch.case_size_mm),
+    numericValue(candidate.case_size_mm),
+    [
+      [1, 18],
+      [2, 14],
+      [3, 9],
+      [4, 5],
+    ],
+  );
+}
+
+const highIntentBrandPairs = [
+  ["rolex", "omega"],
+  ["rolex", "tudor"],
+  ["omega", "tudor"],
+  ["omega", "breitling"],
+  ["tudor", "longines"],
+  ["tudor", "tag heuer"],
+  ["seiko", "tudor"],
+  ["grand seiko", "omega"],
+  ["iwc", "breitling"],
+  ["cartier", "omega"],
+] as const;
+
+const comparisonFamilies = [
+  ["submariner", "seamaster", "black bay", "superocean", "pelagos", "prospex", "hydroconquest", "diver"],
+  ["speedmaster", "navitimer", "chronomat", "daytona", "black bay chrono", "top time", "chronograph"],
+  ["gmt-master", "gmt", "explorer ii", "worldtimer", "aerospace"],
+  ["datejust", "aqua terra", "santos", "heritage", "classic", "oyster perpetual"],
+  ["tank", "presage", "cocktail", "portofino", "dolce vita", "dress"],
+] as const;
+
+function includesAny(text: string, values: readonly string[]) {
+  return values.some((value) => text.includes(value));
+}
+
+function sameFamilyScore(watchText: string, candidateText: string) {
+  return comparisonFamilies.some(
+    (family) => includesAny(watchText, family) && includesAny(candidateText, family),
+  )
+    ? 18
+    : 0;
+}
+
+function brandPairScore(watch: WatchDetailRow, candidate: WatchDetailRow) {
+  const brand = textValue(watch.brand_name);
+  const candidateBrand = textValue(candidate.brand_name);
+
+  if (!brand || !candidateBrand || brand === candidateBrand) {
+    return 0;
+  }
+
+  const directPair = highIntentBrandPairs.some(
+    ([left, right]) =>
+      (brand === left && candidateBrand === right) ||
+      (brand === right && candidateBrand === left),
+  );
+
+  return directPair ? 14 : 7;
+}
+
+function comparisonSuggestionScore(watch: WatchDetailRow, candidate: WatchDetailRow) {
+  const category = textValue(watch.category);
+  const candidateCategory = textValue(candidate.category);
+  const sameCategory = Boolean(category && candidateCategory && category === candidateCategory);
+  const sameBrand = Boolean(watch.brand_name && watch.brand_name === candidate.brand_name);
+  const sameCollection = Boolean(watch.collection_name && watch.collection_name === candidate.collection_name);
+  const differentBrand = Boolean(watch.brand_name && candidate.brand_name && watch.brand_name !== candidate.brand_name);
+  const watchText = searchableWatchText(watch);
+  const candidateText = searchableWatchText(candidate);
+
+  let score = 0;
+
+  if (sameCategory) score += 36;
+  if (sameCategory && differentBrand) score += 14;
+  if (sameBrand) score += 6;
+  if (sameCollection) score += 4;
+
+  score += msrpSimilarityScore(watch, candidate);
+  score += caseSizeSimilarityScore(watch, candidate);
+  score += sameFamilyScore(watchText, candidateText);
+  score += brandPairScore(watch, candidate);
+
+  return score;
+}
+
 function structuredSpecProperties(watch: WatchDetailRow) {
   return [
     { name: "Reference Number", value: watch.reference_number },
@@ -177,22 +329,56 @@ function structuredSpecProperties(watch: WatchDetailRow) {
 
 function suggestedComparisons(watch: WatchDetailRow, watches: WatchDetailRow[]) {
   const currentId = watchId(watch);
-
-  return watches
+  const scoredCandidates = watches
     .filter((candidate) => watchId(candidate) !== currentId)
-    .sort((left, right) => {
-      const leftSameBrand = left.brand_name === watch.brand_name ? 0 : 1;
-      const rightSameBrand = right.brand_name === watch.brand_name ? 0 : 1;
-      const leftSameCollection = left.collection_name === watch.collection_name ? 0 : 1;
-      const rightSameCollection = right.collection_name === watch.collection_name ? 0 : 1;
+    .map((candidate) => ({
+      candidate,
+      displayName: watchDisplayName(candidate),
+      score: comparisonSuggestionScore(watch, candidate),
+    }))
+    .sort(
+      (left, right) =>
+        right.score - left.score ||
+        left.displayName.localeCompare(right.displayName),
+    );
 
-      return (
-        leftSameBrand - rightSameBrand ||
-        leftSameCollection - rightSameCollection ||
-        watchDisplayName(left).localeCompare(watchDisplayName(right))
-      );
-    })
-    .slice(0, 4);
+  const selected: WatchDetailRow[] = [];
+  const selectedIds = new Set<string>();
+  const brandCounts = new Map<string, number>();
+
+  for (const { candidate } of scoredCandidates) {
+    const brand = textValue(candidate.brand_name);
+    const currentCount = brandCounts.get(brand) ?? 0;
+
+    if (brand && currentCount >= 2) {
+      continue;
+    }
+
+    selected.push(candidate);
+    selectedIds.add(watchId(candidate));
+
+    if (brand) {
+      brandCounts.set(brand, currentCount + 1);
+    }
+
+    if (selected.length === 4) {
+      return selected;
+    }
+  }
+
+  for (const { candidate } of scoredCandidates) {
+    if (selectedIds.has(watchId(candidate))) {
+      continue;
+    }
+
+    selected.push(candidate);
+
+    if (selected.length === 4) {
+      break;
+    }
+  }
+
+  return selected;
 }
 
 async function loadApprovedWatches() {
