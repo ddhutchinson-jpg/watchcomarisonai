@@ -68,8 +68,8 @@ function WatchHeroCard({
   const name = watchDisplayName(watch);
 
   return (
-    <article className="grid h-full overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-[0_18px_60px_rgba(0,0,0,0.08)]">
-      <div className="flex items-center justify-end gap-3 border-b border-zinc-200 bg-zinc-50 px-4 py-3">
+    <article className="grid h-full overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-[0_18px_60px_rgba(0,0,0,0.08)] sm:rounded-xl">
+      <div className="hidden items-center justify-end gap-3 border-b border-zinc-200 bg-zinc-50 px-4 py-3 sm:flex">
         <Link
           href={`/watches/${watchSlug(watch)}`}
           className="text-xs font-bold text-zinc-600 transition hover:text-red-600"
@@ -78,7 +78,7 @@ function WatchHeroCard({
         </Link>
       </div>
       <div
-        className="grid h-72 place-items-center bg-zinc-100 bg-contain bg-center bg-no-repeat"
+        className="grid h-36 place-items-center bg-zinc-100 bg-contain bg-center bg-no-repeat sm:h-72"
         style={imageUrl ? { backgroundImage: `url("${imageUrl}")` } : undefined}
       >
         {!imageUrl ? (
@@ -87,43 +87,43 @@ function WatchHeroCard({
           </span>
         ) : null}
       </div>
-      <div className="grid gap-4 p-5">
-        <div className="min-h-24">
-          <h2 className="text-2xl font-extrabold leading-tight text-black">
+      <div className="grid gap-3 p-3 sm:gap-4 sm:p-5">
+        <div className="min-h-20 sm:min-h-24">
+          <h2 className="text-sm font-extrabold leading-tight text-black sm:text-2xl">
             {name}
           </h2>
-          <p className="mt-2 text-xs font-semibold uppercase tracking-[0.14em] text-zinc-500">
+          <p className="mt-2 break-words text-[0.62rem] font-semibold uppercase tracking-[0.08em] text-zinc-500 sm:text-xs sm:tracking-[0.14em]">
             {watch.reference_number || "Reference not listed"}
           </p>
         </div>
-        <dl className="grid grid-cols-2 gap-2 text-sm">
-          <div className="rounded-lg bg-zinc-50 p-3">
-            <dt className="text-[0.65rem] font-extrabold uppercase tracking-[0.14em] text-zinc-500">
+        <dl className="grid gap-1 text-xs sm:grid-cols-2 sm:gap-2 sm:text-sm">
+          <div className="rounded-md bg-zinc-50 p-2 sm:rounded-lg sm:p-3">
+            <dt className="text-[0.58rem] font-extrabold uppercase tracking-[0.1em] text-zinc-500 sm:text-[0.65rem] sm:tracking-[0.14em]">
               Case
             </dt>
-            <dd className="mt-1 font-bold text-black">
+            <dd className="mt-1 break-words font-bold leading-4 text-black sm:leading-5">
               {compactSpec(watch.case_size_mm ?? watch.case_size, "mm")}
             </dd>
           </div>
-          <div className="rounded-lg bg-zinc-50 p-3">
-            <dt className="text-[0.65rem] font-extrabold uppercase tracking-[0.14em] text-zinc-500">
+          <div className="rounded-md bg-zinc-50 p-2 sm:rounded-lg sm:p-3">
+            <dt className="text-[0.58rem] font-extrabold uppercase tracking-[0.1em] text-zinc-500 sm:text-[0.65rem] sm:tracking-[0.14em]">
               MSRP
             </dt>
-            <dd className="mt-1 font-bold text-black">{formatMsrp(watch)}</dd>
+            <dd className="mt-1 break-words font-bold leading-4 text-black sm:leading-5">{formatMsrp(watch)}</dd>
           </div>
-          <div className="rounded-lg bg-zinc-50 p-3">
-            <dt className="text-[0.65rem] font-extrabold uppercase tracking-[0.14em] text-zinc-500">
+          <div className="rounded-md bg-zinc-50 p-2 sm:rounded-lg sm:p-3">
+            <dt className="text-[0.58rem] font-extrabold uppercase tracking-[0.1em] text-zinc-500 sm:text-[0.65rem] sm:tracking-[0.14em]">
               Movement
             </dt>
-            <dd className="mt-1 font-bold text-black">
+            <dd className="mt-1 break-words font-bold leading-4 text-black sm:leading-5">
               {compactSpec(watch.movement_type)}
             </dd>
           </div>
-          <div className="rounded-lg bg-zinc-50 p-3">
-            <dt className="text-[0.65rem] font-extrabold uppercase tracking-[0.14em] text-zinc-500">
+          <div className="rounded-md bg-zinc-50 p-2 sm:rounded-lg sm:p-3">
+            <dt className="text-[0.58rem] font-extrabold uppercase tracking-[0.1em] text-zinc-500 sm:text-[0.65rem] sm:tracking-[0.14em]">
               Reserve
             </dt>
-            <dd className="mt-1 font-bold text-black">
+            <dd className="mt-1 break-words font-bold leading-4 text-black sm:leading-5">
               {compactSpec(watch.power_reserve_hours, "h")}
             </dd>
           </div>
@@ -288,9 +288,9 @@ export default async function WatchPairPage({ params }: PageProps) {
               </p>
             </div>
 
-            <div className="mt-7 grid items-center gap-5 lg:grid-cols-[minmax(0,1fr)_4.5rem_minmax(0,1fr)] lg:items-stretch">
+            <div className="mt-7 grid grid-cols-[minmax(0,1fr)_2.75rem_minmax(0,1fr)] items-stretch gap-2 sm:grid-cols-[minmax(0,1fr)_4.5rem_minmax(0,1fr)] sm:gap-5">
               <WatchHeroCard watch={watchA} />
-              <div className="grid h-16 w-16 place-items-center self-center justify-self-center rounded-full bg-red-600 text-sm font-extrabold text-white shadow-[0_18px_42px_rgba(216,25,43,0.28)]">
+              <div className="grid h-11 w-11 place-items-center self-start justify-self-center rounded-full bg-red-600 text-xs font-extrabold text-white shadow-[0_18px_42px_rgba(216,25,43,0.28)] sm:h-16 sm:w-16 sm:self-center sm:text-sm">
                 VS
               </div>
               <WatchHeroCard watch={watchB} />
