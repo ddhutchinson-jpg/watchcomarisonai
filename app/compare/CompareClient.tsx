@@ -895,7 +895,7 @@ function SpecSection({
               }`}
             >
               <dt
-                className={`px-2 py-3 text-[0.6rem] font-semibold uppercase leading-4 tracking-[0.06em] sm:px-5 sm:py-4 sm:text-xs sm:tracking-[0.14em] ${
+                className={`min-w-0 break-words px-2 py-3 text-[0.6rem] font-semibold uppercase leading-4 tracking-[0.06em] [overflow-wrap:anywhere] sm:px-5 sm:py-4 sm:text-xs sm:tracking-[0.14em] sm:[overflow-wrap:normal] ${
                   field.emphasis ? "text-black" : "text-zinc-600"
                 }`}
               >
